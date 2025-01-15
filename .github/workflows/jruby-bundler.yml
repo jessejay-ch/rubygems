@@ -2,7 +2,10 @@ name: jruby-bundler
 
 on:
   pull_request:
-  merge_group:
+
+  push:
+    branches:
+      - master
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -14,12 +17,11 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 defaults:
   run:
     shell: bash
-    working-directory: ./bundler
 
 jobs:
   jruby_bundler:
-    name: Bundler on JRuby (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: Bundler on JRuby (${{ matrix.os.name }})
+    runs-on: ${{ matrix.os.value }}
 
     env:
       RGV: ..
@@ -27,36 +29,39 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022]
+        os:
+          - { name: Ubuntu, value: ubuntu-24.04 }
+          - { name: Windows, value: windows-2022 }
 
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup ruby
-        uses: ruby/setup-ruby@e6689b4deb1cb2062ea45315001f687c0b52111b # v1.144.1
+        uses: ruby/setup-ruby@4a9ddd6f338a97768b8006bf671dfbad383215f4 # v1.207.0
         with:
-          ruby-version: jruby-9.4.2.0
+          ruby-version: jruby-9.4.9.0
           bundler: none
       - name: Setup java
-        uses: actions/setup-java@3f07048e3d294f56e9b90ac5ea2c6f74e9ad0f98 # v3.10.0
+        uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
         with:
           distribution: temurin
           java-version: 19.0.2
-        if: "!startsWith(matrix.os.name, 'ubuntu')"
+        if: matrix.os.name != 'Ubuntu'
       - name: Prepare dependencies
         run: |
           bin/rake spec:parallel_deps
       - name: Run Test
         run: |
           bin/parallel_rspec --tag jruby_only --tag jruby
-        if: startsWith(matrix.os.name, 'ubuntu')
+        working-directory: ./bundler
+        if: matrix.os.name == 'Ubuntu'
       - name: Install local bundler
         run: |
-          bin/rake install:local
-        if: startsWith(matrix.os.name, 'ubuntu')
+          bin/rake bundler:install:local
+        if: matrix.os.name == 'Ubuntu'
       - name: Run a warbler project
         run: |
-          cd spec/realworld/fixtures/warbler
+          cd bundler/spec/realworld/fixtures/warbler
           bundle install
           bundle exec warble
           java -jar warbler.jar
-        if: startsWith(matrix.os.name, 'ubuntu')
+        if: matrix.os.name == 'Ubuntu'

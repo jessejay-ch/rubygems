@@ -4,7 +4,7 @@ require_relative "helper"
 require "rubygems/command_manager"
 
 class TestGemCommandManager < Gem::TestCase
-  PROJECT_DIR = File.expand_path("../..", __dir__).tap(&Gem::UNTAINT)
+  PROJECT_DIR = File.expand_path("../..", __dir__)
 
   def setup
     super
@@ -50,16 +50,17 @@ class TestGemCommandManager < Gem::TestCase
   end
 
   def test_find_command_ambiguous_exact
-    ins_command = Class.new
-    Gem::Commands.send :const_set, :InsCommand, ins_command
+    old_load_path = $:.dup
+    $: << File.expand_path("test/rubygems", PROJECT_DIR)
 
     @command_manager.register_command :ins
 
     command = @command_manager.find_command "ins"
 
-    assert_kind_of ins_command, command
+    assert_kind_of Gem::Commands::InsCommand, command
   ensure
-    Gem::Commands.send :remove_const, :InsCommand
+    $:.replace old_load_path
+    @command_manager.unregister_command :ins
   end
 
   def test_find_command_unknown
@@ -150,7 +151,7 @@ class TestGemCommandManager < Gem::TestCase
       end
     end
 
-    assert_match(/install isn't a directory./i, @ui.error)
+    assert_match(/install isn't a directory\./i, @ui.error)
   end
 
   def test_process_args_with_c_flag_path_not_found
@@ -164,7 +165,7 @@ class TestGemCommandManager < Gem::TestCase
       end
     end
 
-    assert_match(/#{custom_start_point} isn't a directory./i, @ui.error)
+    assert_match(/#{Regexp.quote(custom_start_point)} isn't a directory\./i, @ui.error)
   end
 
   def test_process_args_bad_arg
@@ -368,7 +369,7 @@ class TestGemCommandManager < Gem::TestCase
     end
 
     assert_equal "pew pew!\n", @ui.output
-    assert_match(/WARNING:  foo command is deprecated. It will be removed in Rubygems [0-9]+/, @ui.error)
+    assert_match(/WARNING:  foo command is deprecated\. It will be removed in Rubygems [0-9]+/, @ui.error)
   ensure
     Gem::Commands.send(:remove_const, :FooCommand)
   end
@@ -393,7 +394,7 @@ class TestGemCommandManager < Gem::TestCase
     end
 
     assert_equal "pew pew!\n", @ui.output
-    assert_match(/WARNING:  foo command is deprecated. It will be removed in Rubygems 9.9.9/, @ui.error)
+    assert_match(/WARNING:  foo command is deprecated\. It will be removed in Rubygems 9\.9\.9/, @ui.error)
   ensure
     Gem::Commands.send(:remove_const, :FooCommand)
   end

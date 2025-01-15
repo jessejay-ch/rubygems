@@ -6,7 +6,7 @@
 # See LICENSE.txt for permissions.
 #++
 
-require_relative "optparse"
+require_relative "vendored_optparse"
 require_relative "requirement"
 require_relative "user_interaction"
 
@@ -190,7 +190,7 @@ class Gem::Command
             "Please specify at least one gem name (e.g. gem build GEMNAME)"
     end
 
-    args.select {|arg| arg !~ /^-/ }
+    args.reject {|arg| arg.start_with?("-") }
   end
 
   ##
@@ -396,22 +396,21 @@ class Gem::Command
 
   def check_deprecated_options(options)
     options.each do |option|
-      if option_is_deprecated?(option)
-        deprecation = @deprecated_options[command][option]
-        version_to_expire = deprecation["rg_version_to_expire"]
+      next unless option_is_deprecated?(option)
+      deprecation = @deprecated_options[command][option]
+      version_to_expire = deprecation["rg_version_to_expire"]
 
-        deprecate_option_msg = if version_to_expire
-          "The \"#{option}\" option has been deprecated and will be removed in Rubygems #{version_to_expire}."
-        else
-          "The \"#{option}\" option has been deprecated and will be removed in future versions of Rubygems."
-        end
-
-        extra_msg = deprecation["extra_msg"]
-
-        deprecate_option_msg += " #{extra_msg}" if extra_msg
-
-        alert_warning(deprecate_option_msg)
+      deprecate_option_msg = if version_to_expire
+        "The \"#{option}\" option has been deprecated and will be removed in Rubygems #{version_to_expire}."
+      else
+        "The \"#{option}\" option has been deprecated and will be removed in future versions of Rubygems."
       end
+
+      extra_msg = deprecation["extra_msg"]
+
+      deprecate_option_msg += " #{extra_msg}" if extra_msg
+
+      alert_warning(deprecate_option_msg)
     end
   end
 
@@ -429,9 +428,9 @@ class Gem::Command
 
   def handles?(args)
     parser.parse!(args.dup)
-    return true
+    true
   rescue StandardError
-    return false
+    false
   end
 
   ##
@@ -458,7 +457,7 @@ class Gem::Command
     until extra.empty? do
       ex = []
       ex << extra.shift
-      ex << extra.shift if extra.first.to_s =~ /^[^-]/
+      ex << extra.shift if /^[^-]/.match?(extra.first.to_s)
       result << ex if handles?(ex)
     end
 
@@ -486,7 +485,7 @@ class Gem::Command
 
     @parser.separator nil
     @parser.separator "  Description:"
-    formatted.split("\n").each do |line|
+    formatted.each_line do |line|
       @parser.separator "    #{line.rstrip}"
     end
   end
@@ -513,8 +512,8 @@ class Gem::Command
 
     @parser.separator nil
     @parser.separator "  #{title}:"
-    content.split(/\n/).each do |line|
-      @parser.separator "    #{line}"
+    content.each_line do |line|
+      @parser.separator "    #{line.rstrip}"
     end
   end
 
@@ -523,7 +522,7 @@ class Gem::Command
 
     @parser.separator nil
     @parser.separator "  Summary:"
-    wrap(@summary, 80 - 4).split("\n").each do |line|
+    wrap(@summary, 80 - 4).each_line do |line|
       @parser.separator "    #{line.strip}"
     end
   end

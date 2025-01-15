@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-#++
+# rubocop:disable Style/AsciiComments
+
 # Copyright (C) 2004 Mauricio Julio Fernández Pradier
 # See LICENSE.txt for additional licensing information.
-#--
+
+# rubocop:enable Style/AsciiComments
 
 ##
 # Class for reading entries out of a tar file
@@ -85,11 +87,7 @@ class Gem::Package::TarReader::Entry
   # Full name of the tar entry
 
   def full_name
-    if @header.prefix != ""
-      File.join @header.prefix, @header.name
-    else
-      @header.name
-    end
+    @header.full_name.force_encoding(Encoding::UTF_8)
   rescue ArgumentError => e
     raise unless e.message == "string contains null byte"
     raise Gem::Package::TarInvalidError,
@@ -100,9 +98,7 @@ class Gem::Package::TarReader::Entry
   # Read one byte from the tar entry
 
   def getc
-    check_closed
-
-    return nil if @read >= @header.size
+    return nil if eof?
 
     ret = @io.getc
     @read += 1 if ret
@@ -145,7 +141,6 @@ class Gem::Package::TarReader::Entry
 
   def pos=(new_pos)
     seek(new_pos, IO::SEEK_SET)
-    new_pos
   end
 
   def size
@@ -155,30 +150,28 @@ class Gem::Package::TarReader::Entry
   alias_method :length, :size
 
   ##
-  # Reads +len+ bytes from the tar file entry, or the rest of the entry if
-  # nil
+  # Reads +maxlen+ bytes from the tar file entry, or the rest of the entry if nil
 
-  def read(len = nil)
-    check_closed
+  def read(maxlen = nil)
+    if eof?
+      return maxlen.to_i.zero? ? "" : nil
+    end
 
-    len ||= @header.size - @read
-
-    return nil if len > 0 && @read >= @header.size
-
-    max_read = [len, @header.size - @read].min
+    max_read = [maxlen, @header.size - @read].compact.min
 
     ret = @io.read max_read
+    if ret.nil?
+      return maxlen ? nil : "" # IO.read returns nil on EOF with len argument
+    end
     @read += ret.size
 
     ret
   end
 
-  def readpartial(maxlen = nil, outbuf = "".b)
-    check_closed
-
-    maxlen ||= @header.size - @read
-
-    raise EOFError if maxlen > 0 && @read >= @header.size
+  def readpartial(maxlen, outbuf = "".b)
+    if eof? && maxlen > 0
+      raise EOFError, "end of file reached"
+    end
 
     max_read = [maxlen, @header.size - @read].min
 
@@ -212,6 +205,8 @@ class Gem::Package::TarReader::Entry
 
     pending = new_pos - @io.pos
 
+    return 0 if pending == 0
+
     if @io.respond_to?(:seek)
       begin
         # avoid reading if the @io supports seeking
@@ -229,8 +224,8 @@ class Gem::Package::TarReader::Entry
     end
 
     while pending > 0 do
-      size_read = @io.read([pending, 4096].min).size
-      raise UnexpectedEOF if @io.eof?
+      size_read = @io.read([pending, 4096].min)&.size
+      raise(EOFError, "end of file reached") if size_read.nil?
       pending -= size_read
     end
 

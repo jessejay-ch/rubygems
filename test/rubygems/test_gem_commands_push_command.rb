@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 require_relative "helper"
+require_relative "multifactor_auth_utilities"
 require "rubygems/commands/push_command"
+require "rubygems/config_file"
 
 class TestGemCommandsPushCommand < Gem::TestCase
   def setup
@@ -25,7 +27,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
     @host = "https://rubygems.example"
     @api_key = Gem.configuration.rubygems_api_key
 
-    @fetcher = Gem::FakeFetcher.new
+    @fetcher = Gem::MultifactorAuthFetcher.new
     Gem::RemoteFetcher.fetcher = @fetcher
 
     @cmd = Gem::Commands::PushCommand.new
@@ -56,9 +58,9 @@ class TestGemCommandsPushCommand < Gem::TestCase
       @cmd.send_gem(@path)
     end
 
-    assert_match %r{Pushing gem to #{@host}...}, @ui.output
+    assert_match(/Pushing gem to #{@host}.../, @ui.output)
 
-    assert_equal Net::HTTP::Post, @fetcher.last_request.class
+    assert_equal Gem::Net::HTTP::Post, @fetcher.last_request.class
     assert_equal Gem.read_binary(@path), @fetcher.last_request.body
     assert_equal File.size(@path), @fetcher.last_request["Content-Length"].to_i
     assert_equal "application/octet-stream", @fetcher.last_request["Content-Type"]
@@ -75,7 +77,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
 
     @cmd.execute
 
-    assert_equal Net::HTTP::Post, @fetcher.last_request.class
+    assert_equal Gem::Net::HTTP::Post, @fetcher.last_request.class
     assert_equal Gem.read_binary(@path), @fetcher.last_request.body
     assert_equal "application/octet-stream",
                  @fetcher.last_request["Content-Type"]
@@ -94,10 +96,51 @@ class TestGemCommandsPushCommand < Gem::TestCase
 
     @cmd.execute
 
-    assert_equal Net::HTTP::Post, @fetcher.last_request.class
+    assert_equal Gem::Net::HTTP::Post, @fetcher.last_request.class
     assert_equal Gem.read_binary(@path), @fetcher.last_request.body
     assert_equal "application/octet-stream",
                  @fetcher.last_request["Content-Type"]
+  end
+
+  def test_execute_attestation
+    @response = "Successfully registered gem: freewill (1.0.0)"
+    @fetcher.data["#{Gem.host}/api/v1/gems"] = HTTPResponseFactory.create(body: @response, code: 200, msg: "OK")
+
+    File.write("#{@path}.sigstore.json", "attestation")
+    @cmd.options[:args] = [@path]
+    @cmd.options[:attestations] = ["#{@path}.sigstore.json"]
+
+    @cmd.execute
+
+    assert_equal Gem::Net::HTTP::Post, @fetcher.last_request.class
+    content_length = @fetcher.last_request["Content-Length"].to_i
+    assert_equal content_length, @fetcher.last_request.body.length
+    assert_equal "multipart", @fetcher.last_request.main_type, @fetcher.last_request.content_type
+    assert_equal "form-data", @fetcher.last_request.sub_type
+    assert_include @fetcher.last_request.type_params, "boundary"
+    boundary = @fetcher.last_request.type_params["boundary"]
+
+    parts = @fetcher.last_request.body.split(/(?:\r\n|\A)--#{Regexp.quote(boundary)}(?:\r\n|--)/m)
+    refute_empty parts
+    assert_empty parts[0]
+    parts.shift # remove the first empty part
+
+    p1 = parts.shift
+    p2 = parts.shift
+    assert_equal "\r\n", parts.shift
+    assert_empty parts
+
+    assert_equal [
+      "Content-Disposition: form-data; name=\"gem\"; filename=\"#{@path}\"",
+      "Content-Type: application/octet-stream",
+      nil,
+      Gem.read_binary(@path),
+    ].join("\r\n").b, p1
+    assert_equal [
+      "Content-Disposition: form-data; name=\"attestations\"",
+      nil,
+      "[#{Gem.read_binary("#{@path}.sigstore.json")}]",
+    ].join("\r\n").b, p2
   end
 
   def test_execute_allowed_push_host
@@ -114,7 +157,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
 
     @cmd.execute
 
-    assert_equal Net::HTTP::Post, @fetcher.last_request.class
+    assert_equal Gem::Net::HTTP::Post, @fetcher.last_request.class
     assert_equal Gem.read_binary(@path), @fetcher.last_request.body
     assert_equal "application/octet-stream",
                  @fetcher.last_request["Content-Type"]
@@ -157,7 +200,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
     }
 
     File.open Gem.configuration.credentials_path, "w" do |f|
-      f.write keys.to_yaml
+      f.write Gem::ConfigFile.dump_with_rubygems_yaml(keys)
     end
     Gem.configuration.load_api_keys
 
@@ -191,7 +234,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
     }
 
     File.open Gem.configuration.credentials_path, "w" do |f|
-      f.write keys.to_yaml
+      f.write Gem::ConfigFile.dump_with_rubygems_yaml(keys)
     end
     Gem.configuration.load_api_keys
 
@@ -228,11 +271,11 @@ class TestGemCommandsPushCommand < Gem::TestCase
     @api_key = "DOESNTMATTER"
 
     keys = {
-      :rubygems_api_key => @api_key,
+      rubygems_api_key: @api_key,
     }
 
     File.open Gem.configuration.credentials_path, "w" do |f|
-      f.write keys.to_yaml
+      f.write Gem::ConfigFile.dump_with_rubygems_yaml(keys)
     end
     Gem.configuration.load_api_keys
 
@@ -273,7 +316,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
     }
 
     File.open Gem.configuration.credentials_path, "w" do |f|
-      f.write keys.to_yaml
+      f.write Gem::ConfigFile.dump_with_rubygems_yaml(keys)
     end
     Gem.configuration.load_api_keys
 
@@ -303,7 +346,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
     }
 
     File.open Gem.configuration.credentials_path, "w" do |f|
-      f.write keys.to_yaml
+      f.write Gem::ConfigFile.dump_with_rubygems_yaml(keys)
     end
     Gem.configuration.load_api_keys
 
@@ -315,9 +358,9 @@ class TestGemCommandsPushCommand < Gem::TestCase
     # do not set @host
     use_ui(@ui) { @cmd.send_gem(@path) }
 
-    assert_match %r{Pushing gem to #{host}...}, @ui.output
+    assert_match(/Pushing gem to #{host}.../, @ui.output)
 
-    assert_equal Net::HTTP::Post, @fetcher.last_request.class
+    assert_equal Gem::Net::HTTP::Post, @fetcher.last_request.class
     assert_equal Gem.read_binary(@path), @fetcher.last_request.body
     assert_equal File.size(@path), @fetcher.last_request["Content-Length"].to_i
     assert_equal "application/octet-stream", @fetcher.last_request["Content-Type"]
@@ -385,13 +428,9 @@ class TestGemCommandsPushCommand < Gem::TestCase
   end
 
   def test_otp_verified_success
-    response_fail = "You have enabled multifactor authentication but your request doesn't have the correct OTP code. Please check it and retry."
     response_success = "Successfully registered gem: freewill (1.0.0)"
 
-    @fetcher.data["#{Gem.host}/api/v1/gems"] = [
-      HTTPResponseFactory.create(body: response_fail, code: 401, msg: "Unauthorized"),
-      HTTPResponseFactory.create(body: response_success, code: 200, msg: "OK"),
-    ]
+    @fetcher.respond_with_require_otp("#{Gem.host}/api/v1/gems", response_success)
 
     @otp_ui = Gem::MockGemUi.new "111111\n"
     use_ui @otp_ui do
@@ -407,6 +446,8 @@ class TestGemCommandsPushCommand < Gem::TestCase
   def test_otp_verified_failure
     response = "You have enabled multifactor authentication but your request doesn't have the correct OTP code. Please check it and retry."
     @fetcher.data["#{Gem.host}/api/v1/gems"] = HTTPResponseFactory.create(body: response, code: 401, msg: "Unauthorized")
+    @fetcher.data["#{Gem.host}/api/v1/webauthn_verification"] =
+      HTTPResponseFactory.create(body: "You don't have any security devices", code: 422, msg: "Unprocessable Entity")
 
     @otp_ui = Gem::MockGemUi.new "111111\n"
     assert_raise Gem::MockGemUi::TermError do
@@ -421,6 +462,106 @@ class TestGemCommandsPushCommand < Gem::TestCase
     assert_equal "111111", @fetcher.last_request["OTP"]
   end
 
+  def test_with_webauthn_enabled_success
+    response_success = "Successfully registered gem: freewill (1.0.0)"
+    server = Gem::MockTCPServer.new
+
+    @fetcher.respond_with_require_otp("#{Gem.host}/api/v1/gems", response_success)
+    @fetcher.respond_with_webauthn_url
+
+    TCPServer.stub(:new, server) do
+      Gem::GemcutterUtilities::WebauthnListener.stub(:listener_thread, Thread.new { Thread.current[:otp] = "Uvh6T57tkWuUnWYo" }) do
+        use_ui @ui do
+          @cmd.send_gem(@path)
+        end
+      end
+    end
+
+    assert_match "You have enabled multi-factor authentication. Please visit #{@fetcher.webauthn_url_with_port(server.port)} " \
+      "to authenticate via security device. If you can't verify using WebAuthn but have OTP enabled, " \
+      "you can re-run the gem signin command with the `--otp [your_code]` option.", @ui.output
+    assert_match "You are verified with a security device. You may close the browser window.", @ui.output
+    assert_equal "Uvh6T57tkWuUnWYo", @fetcher.last_request["OTP"]
+    assert_match response_success, @ui.output
+  end
+
+  def test_with_webauthn_enabled_failure
+    response_success = "Successfully registered gem: freewill (1.0.0)"
+    server = Gem::MockTCPServer.new
+    error = Gem::WebauthnVerificationError.new("Something went wrong")
+
+    @fetcher.respond_with_require_otp("#{Gem.host}/api/v1/gems", response_success)
+    @fetcher.respond_with_webauthn_url
+
+    error = assert_raise Gem::MockGemUi::TermError do
+      TCPServer.stub(:new, server) do
+        Gem::GemcutterUtilities::WebauthnListener.stub(:listener_thread, Thread.new { Thread.current[:error] = error }) do
+          use_ui @ui do
+            @cmd.send_gem(@path)
+          end
+        end
+      end
+    end
+    assert_equal 1, error.exit_code
+
+    assert_match @fetcher.last_request["Authorization"], Gem.configuration.rubygems_api_key
+    assert_match "You have enabled multi-factor authentication. Please visit #{@fetcher.webauthn_url_with_port(server.port)} " \
+      "to authenticate via security device. If you can't verify using WebAuthn but have OTP enabled, " \
+      "you can re-run the gem signin command with the `--otp [your_code]` option.", @ui.output
+    assert_match "ERROR:  Security device verification failed: Something went wrong", @ui.error
+    refute_match "You are verified with a security device. You may close the browser window.", @ui.output
+    refute_match response_success, @ui.output
+  end
+
+  def test_with_webauthn_enabled_success_with_polling
+    response_success = "Successfully registered gem: freewill (1.0.0)"
+    server = Gem::MockTCPServer.new
+
+    @fetcher.respond_with_require_otp("#{Gem.host}/api/v1/gems", response_success)
+    @fetcher.respond_with_webauthn_url
+    @fetcher.respond_with_webauthn_polling("Uvh6T57tkWuUnWYo")
+
+    TCPServer.stub(:new, server) do
+      use_ui @ui do
+        @cmd.send_gem(@path)
+      end
+    end
+
+    assert_match "You have enabled multi-factor authentication. Please visit #{@fetcher.webauthn_url_with_port(server.port)} " \
+      "to authenticate via security device. If you can't verify using WebAuthn but have OTP enabled, " \
+      "you can re-run the gem signin command with the `--otp [your_code]` option.", @ui.output
+    assert_match "You are verified with a security device. You may close the browser window.", @ui.output
+    assert_equal "Uvh6T57tkWuUnWYo", @fetcher.last_request["OTP"]
+    assert_match response_success, @ui.output
+  end
+
+  def test_with_webauthn_enabled_failure_with_polling
+    response_success = "Successfully registered gem: freewill (1.0.0)"
+    server = Gem::MockTCPServer.new
+
+    @fetcher.respond_with_require_otp("#{Gem.host}/api/v1/gems", response_success)
+    @fetcher.respond_with_webauthn_url
+    @fetcher.respond_with_webauthn_polling_failure
+
+    error = assert_raise Gem::MockGemUi::TermError do
+      TCPServer.stub(:new, server) do
+        use_ui @ui do
+          @cmd.send_gem(@path)
+        end
+      end
+    end
+    assert_equal 1, error.exit_code
+
+    assert_match @fetcher.last_request["Authorization"], Gem.configuration.rubygems_api_key
+    assert_match "You have enabled multi-factor authentication. Please visit #{@fetcher.webauthn_url_with_port(server.port)} " \
+      "to authenticate via security device. If you can't verify using WebAuthn but have OTP enabled, you can re-run the gem signin " \
+      "command with the `--otp [your_code]` option.", @ui.output
+    assert_match "ERROR:  Security device verification failed: The token in the link you used has either expired " \
+      "or been used already.", @ui.error
+    refute_match "You are verified with a security device. You may close the browser window.", @ui.output
+    refute_match response_success, @ui.output
+  end
+
   def test_sending_gem_unathorized_api_key_with_mfa_enabled
     response_mfa_enabled = "You have enabled multifactor authentication but your request doesn't have the correct OTP code. Please check it and retry."
     response_forbidden = "The API key doesn't have access"
@@ -431,6 +572,8 @@ class TestGemCommandsPushCommand < Gem::TestCase
       HTTPResponseFactory.create(body: response_forbidden, code: 403, msg: "Forbidden"),
       HTTPResponseFactory.create(body: response_success, code: 200, msg: "OK"),
     ]
+    @fetcher.data["#{@host}/api/v1/webauthn_verification"] =
+      HTTPResponseFactory.create(body: "You don't have any security devices", code: 422, msg: "Unprocessable Entity")
 
     @fetcher.data["#{@host}/api/v1/api_key"] = HTTPResponseFactory.create(body: "", code: 200, msg: "OK")
     @cmd.instance_variable_set :@host, @host
@@ -445,7 +588,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
     access_notice = "The existing key doesn't have access of push_rubygem on https://rubygems.example. Please sign in to update access."
     assert_match mfa_notice, @ui.output
     assert_match access_notice, @ui.output
-    assert_match "Email:", @ui.output
+    assert_match "Username/email:", @ui.output
     assert_match "Password:", @ui.output
     assert_match "Added push_rubygem scope to the existing API key", @ui.output
     assert_match response_success, @ui.output
@@ -471,6 +614,8 @@ class TestGemCommandsPushCommand < Gem::TestCase
     @fetcher.data["#{@host}/api/v1/profile/me.yaml"] = [
       HTTPResponseFactory.create(body: response_profile, code: 200, msg: "OK"),
     ]
+    @fetcher.data["#{@host}/api/v1/webauthn_verification"] =
+      HTTPResponseFactory.create(body: "You don't have any security devices", code: 422, msg: "Unprocessable Entity")
 
     @cmd.instance_variable_set :@scope, :push_rubygem
     @cmd.options[:args] = [@path]
@@ -484,7 +629,7 @@ class TestGemCommandsPushCommand < Gem::TestCase
     mfa_notice = "You have enabled multi-factor authentication. Please enter OTP code."
     assert_match mfa_notice, @ui.output
     assert_match "Enter your https://rubygems.example credentials.", @ui.output
-    assert_match "Email:", @ui.output
+    assert_match "Username/email:", @ui.output
     assert_match "Password:", @ui.output
     assert_match "Signed in with API key:", @ui.output
     assert_match response_success, @ui.output

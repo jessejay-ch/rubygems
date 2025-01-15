@@ -1,30 +1,20 @@
 HTTP/1.1 200 OK
 connection: keep-alive
-content-length: 11237
-content-type: text/plain; charset=utf-8
-x-frame-options: SAMEORIGIN
-x-xss-protection: 1; mode=block
-x-content-type-options: nosniff
-x-download-options: noopen
-x-permitted-cross-domain-policies: none
-referrer-policy: strict-origin-when-cross-origin
-etag: "7bd2fbce62096c189337310d176818fa"
-last-modified: Tue, 13 Dec 2022 09:20:25 GMT
+content-length: 13284
+last-modified: Fri, 27 Oct 2023 08:31:00 GMT
+etag: "f4e14e2206e7ea32f64477a60abd0db8"
 cache-control: max-age=60, public
-content-security-policy: default-src 'self'; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://secure.gaug.es https://gravatar.com https://secure.gravatar.com https://*.fastly-insights.com; object-src 'none'; script-src 'self' https://secure.gaug.es https://www.fastly-insights.com; style-src 'self' https://fonts.googleapis.com; connect-src 'self' https://s3-us-west-2.amazonaws.com/rubygems-dumps/ https://*.fastly-insights.com https://fastly-insights.com https://api.github.com; form-action 'self'; frame-ancestors 'self'
-x-request-id: 1cfb3a27-e0c1-44b3-99f5-5942a8ead59e
-x-runtime: 0.009867
-strict-transport-security: max-age=31536000
-x-backend: F_Rails 52.43.103.69:443
+content-type: text/plain; charset=utf-8
+digest: sha-256="3gwK7YfGyy7R+RhDW2Veyew/CZMZm+atEgJLF52o1qc="
+via: 1.1 varnish, 1.1 varnish
+x-backend: fastlyshield--shield_ssl_cache_bfi_krnt7300098_BFI 167.82.143.98:443
 accept-ranges: bytes
-date: Tue, 27 Dec 2022 11:24:49 GMT
-via: 1.1 varnish
-age: 2693
-x-served-by: cache-mad22089-MAD
-x-cache: HIT
-x-cache-hits: 2
-x-timer: S1672140290.994130,VS0,VE0
-vary: Accept,Accept-Encoding
+date: Fri, 15 Dec 2023 19:03:07 GMT
+age: 1448
+x-served-by: cache-bfi-krnt7300098-BFI, cache-mad2200087-MAD
+x-cache: HIT, MISS
+x-cache-hits: 154222, 0
+x-timer: S1702666987.144366,VS0,VE174
 server: RubyGems.org
 
 ---
@@ -127,3 +117,17 @@ server: RubyGems.org
 2.14.2 rubocop:~> 1.33|checksum:73ae13cd91affc23dfb5d218e1d3bfcc6ad53fcef948a7caceb80e5d77bf1abd,ruby:>= 2.6.0
 2.15.0 rubocop:~> 1.33|checksum:a476c7671bbeabc9706068be0aa0443a559db6d2b84bfdc582fe65f64b1d455e,ruby:>= 2.6.0
 2.16.0 rubocop:~> 1.33|checksum:b33c5f048182bdb43885958f4115865d49438694fffac98b5406f70302e7ece6,ruby:>= 2.6.0
+2.17.0 rubocop:~> 1.33|checksum:1fecd38978b63192196ee8c6954d99e5fdd095fe60c4e935207c64660e5f4019,ruby:>= 2.6.0
+2.17.1 rubocop:~> 1.33|checksum:6c53405812b997ff0298ce83bf6019dab81dacd842d1b15617a52202d937e88a,ruby:>= 2.6.0
+2.18.0 rubocop:~> 1.33,rubocop-capybara:>= 0|checksum:1e5713ed1a05691b236d0fc7d8fdfb0add310e5753da97ac0ada9ffaae955a2a,ruby:>= 2.6.0
+2.18.1 rubocop:~> 1.33,rubocop-capybara:~> 2.17|checksum:41c6455630fc98b809ebca047413389e2b7e3f68975028365c07bfea878db5ee,ruby:>= 2.6.0
+2.19.0 rubocop:~> 1.33,rubocop-capybara:~> 2.17|checksum:bd392eecdf7cca3b791174da02c012b1e27070b75517595f440f7cfa2d801ecd,ruby:>= 2.6.0
+2.20.0 rubocop:~> 1.33,rubocop-capybara:~> 2.17|checksum:edd2f3277c0c855ea9595f0eb45d6735c413a8f707f96f106c36370a31c8b579,ruby:>= 2.6.0
+2.21.0 rubocop:~> 1.33,rubocop-capybara:~> 2.17|checksum:910cc670707b257fdb56f1289b847bfe1e0f685594e81f410385acfc637d3785,ruby:>= 2.7.0
+2.22.0 rubocop:~> 1.33,rubocop-capybara:~> 2.17,rubocop-factory_bot:~> 2.22|checksum:2d7493222c81c78ad304ddd81aaf64b3543bcfac6d3d8706c220331921753a03,ruby:>= 2.7.0
+2.23.0 rubocop:~> 1.33,rubocop-capybara:~> 2.17,rubocop-factory_bot:~> 2.22|checksum:dee5bb767e290f8c655751c3297493d96d44ecedacb7fc86663ff00580276650,ruby:>= 2.7.0
+2.23.1 rubocop:~> 1.33,rubocop-capybara:~> 2.17,rubocop-factory_bot:~> 2.22|checksum:1dde7da217a9e5349c44b1c52d52f9edb4661694f73007d091d3fe23dff2c8d8,ruby:>= 2.7.0
+2.23.2 rubocop:~> 1.33,rubocop-capybara:~> 2.17,rubocop-factory_bot:~> 2.22|checksum:aef4a8d16661948d2e733ebef76d57e8c81fb34d5621a7e8ce0b76eb14f19c7a,ruby:>= 2.7.0
+2.24.0 rubocop:~> 1.33,rubocop-capybara:~> 2.17,rubocop-factory_bot:~> 2.22|checksum:0b0aace07b4e50b730687a66d7efbba28266eecf4f5f7cfb5995fde20387e935,ruby:>= 2.7.0
+2.24.1 rubocop:~> 1.33,rubocop-capybara:~> 2.17,rubocop-factory_bot:~> 2.22|checksum:5429773e717fc4ce5358c28adf0f0f967898f7670b6066f8997cbb428ee675ff,ruby:>= 2.7.0
+2.25.0 rubocop:~> 1.40,rubocop-capybara:~> 2.17,rubocop-factory_bot:~> 2.22|checksum:083f8a0481dbb9969b2a9eae85670a454fe91d46812e6ec97b34e7f6227b99f3,ruby:>= 2.7.0

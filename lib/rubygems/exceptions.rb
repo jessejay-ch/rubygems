@@ -104,9 +104,6 @@ end
 
 class Gem::GemNotFoundException < Gem::Exception; end
 
-##
-# Raised by the DependencyInstaller when a specific gem cannot be found
-
 class Gem::SpecificGemNotFoundException < Gem::GemNotFoundException
   ##
   # Creates a new SpecificGemNotFoundException for a gem with the given +name+
@@ -136,6 +133,8 @@ class Gem::SpecificGemNotFoundException < Gem::GemNotFoundException
 
   attr_reader :errors
 end
+
+Gem.deprecate_constant :SpecificGemNotFoundException
 
 ##
 # Raised by Gem::Resolver when dependencies conflict and create the
@@ -215,6 +214,16 @@ class Gem::RubyVersionMismatch < Gem::Exception; end
 class Gem::VerificationError < Gem::Exception; end
 
 ##
+# Raised by Gem::WebauthnListener when an error occurs during security
+# device verification.
+
+class Gem::WebauthnVerificationError < Gem::Exception
+  def initialize(message)
+    super "Security device verification failed: #{message}"
+  end
+end
+
+##
 # Raised to indicate that a system exit should occur with the specified
 # exit_code
 
@@ -282,9 +291,3 @@ class Gem::UnsatisfiableDependencyError < Gem::DependencyError
     @dependency.requirement
   end
 end
-
-##
-# Backwards compatible typo'd exception class for early RubyGems 2.0.x
-
-Gem::UnsatisfiableDepedencyError = Gem::UnsatisfiableDependencyError # :nodoc:
-Gem.deprecate_constant :UnsatisfiableDepedencyError

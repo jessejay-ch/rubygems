@@ -29,7 +29,7 @@ class Gem::Source::Local < Gem::Source
 
   def inspect # :nodoc:
     keys = @specs ? @specs.keys.sort : "NOT LOADED"
-    "#<%s specs: %p>" % [self.class, keys]
+    format("#<%s specs: %p>", self.class, keys)
   end
 
   def load_specs(type) # :nodoc:
@@ -40,10 +40,11 @@ class Gem::Source::Local < Gem::Source
 
       Dir["*.gem"].each do |file|
         pkg = Gem::Package.new(file)
+        spec = pkg.spec
       rescue SystemCallError, Gem::Package::FormatError
         # ignore
       else
-        tup = pkg.spec.name_tuple
+        tup = spec.name_tuple
         @specs[tup] = [File.expand_path(file), pkg]
 
         case type
@@ -80,15 +81,14 @@ class Gem::Source::Local < Gem::Source
     found = []
 
     @specs.each do |n, data|
-      if n.name == gem_name
-        s = data[1].spec
+      next unless n.name == gem_name
+      s = data[1].spec
 
-        if version.satisfied_by?(s.version)
-          if prerelease
-            found << s
-          elsif !s.version.prerelease? || version.prerelease?
-            found << s
-          end
+      if version.satisfied_by?(s.version)
+        if prerelease
+          found << s
+        elsif !s.version.prerelease? || version.prerelease?
+          found << s
         end
       end
     end
@@ -117,10 +117,14 @@ class Gem::Source::Local < Gem::Source
   end
 
   def pretty_print(q) # :nodoc:
-    q.group 2, "[Local gems:", "]" do
-      q.breakable
-      q.seplist @specs.keys do |v|
-        q.text v.full_name
+    q.object_group(self) do
+      q.group 2, "[Local gems:", "]" do
+        q.breakable
+        if @specs
+          q.seplist @specs.keys do |v|
+            q.text v.full_name
+          end
+        end
       end
     end
   end

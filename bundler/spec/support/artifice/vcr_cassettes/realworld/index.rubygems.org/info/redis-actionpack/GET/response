@@ -1,30 +1,21 @@
 HTTP/1.1 200 OK
 connection: keep-alive
-content-length: 3476
-content-type: text/plain; charset=utf-8
-x-frame-options: SAMEORIGIN
-x-xss-protection: 1; mode=block
-x-content-type-options: nosniff
-x-download-options: noopen
-x-permitted-cross-domain-policies: none
-referrer-policy: strict-origin-when-cross-origin
-etag: "b46c7f57a4055dc48ba8f89069b43113"
-last-modified: Mon, 17 Jan 2022 01:19:53 GMT
+content-length: 3639
+last-modified: Mon, 04 Dec 2023 22:45:00 GMT
+etag: "a22ed6a6a21125a35bc8e9d93f38664f"
 cache-control: max-age=60, public
-content-security-policy: default-src 'self'; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://secure.gaug.es https://gravatar.com https://secure.gravatar.com https://*.fastly-insights.com; object-src 'none'; script-src 'self' https://secure.gaug.es https://www.fastly-insights.com; style-src 'self' https://fonts.googleapis.com; connect-src 'self' https://s3-us-west-2.amazonaws.com/rubygems-dumps/ https://*.fastly-insights.com https://fastly-insights.com https://api.github.com; form-action 'self'; frame-ancestors 'self'
-x-request-id: 4217c9df-8571-439f-83da-39ac7a97720d
-x-runtime: 0.009512
-strict-transport-security: max-age=31536000
-x-backend: F_Rails 52.26.151.153:443
+content-type: text/plain; charset=utf-8
+digest: sha-256="vsQ8iLypYWCm6Jpa1UqZRoS9/ao6sCm/jaAtwHnKpXw="
+repr-digest: sha-256="vsQ8iLypYWCm6Jpa1UqZRoS9/ao6sCm/jaAtwHnKpXw="
+via: 1.1 varnish, 1.1 varnish
+x-backend: fastlyshield--shield_ssl_cache_bfi_kbfi7400085_BFI 167.82.142.85:443
 accept-ranges: bytes
-date: Tue, 27 Dec 2022 11:24:51 GMT
-via: 1.1 varnish
-age: 0
-x-served-by: cache-mad22089-MAD
-x-cache: HIT
-x-cache-hits: 1
-x-timer: S1672140291.128516,VS0,VE773
-vary: Accept,Accept-Encoding
+date: Fri, 15 Dec 2023 19:03:07 GMT
+age: 3455
+x-served-by: cache-bfi-kbfi7400085-BFI, cache-mad22080-MAD
+x-cache: HIT, HIT
+x-cache-hits: 33528, 1
+x-timer: S1702666988.596833,VS0,VE1
 server: RubyGems.org
 
 ---
@@ -51,3 +42,4 @@ server: RubyGems.org
 5.2.0.pre actionpack:< 7&>= 5,redis-rack:< 3&>= 1,redis-store:< 2&>= 1.1.0|checksum:ac8f854a954fac25e09c65bcc254b765c6c8bf30ae4b1494da5883960c794ffd,ruby:>= 2.3.0,rubygems:> 1.3.1
 5.2.0 actionpack:< 7&>= 5,redis-rack:< 3&>= 2.1.0,redis-store:< 2&>= 1.1.0|checksum:6337f72c5ed21e7d4909468479fe51d9c2b343cf0ea933e0270400f6bf394230,ruby:>= 2.3.0
 5.3.0 actionpack:< 8&>= 5,redis-rack:< 3&>= 2.1.0,redis-store:< 2&>= 1.1.0|checksum:3fb1ad0a8fd9d26a289c9399bb609dcaef38bf37711e6f677a53ca728fc19140,ruby:>= 2.3.0
+5.4.0 actionpack:< 8&>= 5,redis-rack:< 4&>= 2.1.0,redis-store:< 2&>= 1.1.0|checksum:f10cf649ab05914716d63334d7f709221ecc883b87cf348f90ecfe0c35ea3540,ruby:>= 2.3.0

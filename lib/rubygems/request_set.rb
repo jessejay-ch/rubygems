@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "tsort"
+require_relative "vendored_tsort"
 
 ##
 # A RequestSet groups a request to activate a set of dependencies.
@@ -108,7 +108,7 @@ class Gem::RequestSet
     @requests            = []
     @sets                = []
     @soft_missing        = false
-    @sorted              = nil
+    @sorted_requests     = nil
     @specs               = nil
     @vendor_set          = nil
     @source_set          = nil
@@ -324,7 +324,7 @@ class Gem::RequestSet
 
     @git_set.root_dir = @install_dir
 
-    lock_file = "#{File.expand_path(path)}.lock".dup.tap(&Gem::UNTAINT)
+    lock_file = "#{File.expand_path(path)}.lock"
     begin
       tokenizer = Gem::RequestSet::Lockfile::Tokenizer.from_file lock_file
       parser = tokenizer.make_parser self, []
@@ -426,7 +426,7 @@ class Gem::RequestSet
   end
 
   def sorted_requests
-    @sorted ||= strongly_connected_components.flatten
+    @sorted_requests ||= strongly_connected_components.flatten
   end
 
   def specs
@@ -448,7 +448,7 @@ class Gem::RequestSet
       next if dep.type == :development && !@development
 
       match = @requests.find do |r|
-        dep.match? r.spec.name, r.spec.version, r.spec.is_a?(Gem::Resolver::InstalledSpecification) || @prerelease
+        dep.match?(r.spec.name, r.spec.version, r.spec.is_a?(Gem::Resolver::InstalledSpecification) || @prerelease)
       end
 
       unless match

@@ -216,7 +216,7 @@ class TestGemSourceGit < Gem::TestCase
     installed = Gem::Source::Installed.new
     vendor    = Gem::Source::Vendor.new "vendor/foo"
 
-    assert_equal(0, git.<=>(git),       "git <=> git")
+    assert_equal(0, git.<=>(git),       "git <=> git") # rubocop:disable Lint/BinaryOperatorWithIdenticalOperands
 
     assert_equal(1, git.<=>(remote),    "git <=> remote")
     assert_equal(-1, remote.<=>(git), "remote <=> git")
@@ -289,7 +289,11 @@ class TestGemSourceGit < Gem::TestCase
   end
 
   def test_uri
-    assert_equal URI(@repository), @source.uri
+    assert_equal Gem::URI(@repository), @source.uri
+  end
+
+  def test_pretty_print
+    assert_equal "#<Gem::Source::Git[Git: #{@repository} HEAD]>", @source.pretty_inspect.gsub(/\s+/, " ").strip
   end
 
   def test_uri_hash
