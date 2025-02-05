@@ -21,8 +21,8 @@ class Gem::Commands::UnpackCommand < Gem::Command
     require "fileutils"
 
     super "unpack", "Unpack an installed gem to the current directory",
-          :version => Gem::Requirement.default,
-          :target => Dir.pwd
+          version: Gem::Requirement.default,
+          target: Dir.pwd
 
     add_option("--target=DIR",
                "target directory for unpacking") do |value, options|
@@ -130,7 +130,7 @@ command help for an example.
       return this_path if File.exist? this_path
     end
 
-    return nil
+    nil
   end
 
   ##
@@ -143,15 +143,9 @@ command help for an example.
   #   get_path 'rake', '< 0.1' # nil
   #   get_path 'rak'           # nil (exact name required)
   #--
-  # TODO: This should be refactored so that it's a general service. I don't
-  # think any of our existing classes are the right place though.  Just maybe
-  # 'Cache'?
-  #
-  # TODO: It just uses Gem.dir for now.  What's an easy way to get the list of
-  # source directories?
 
   def get_path(dependency)
-    return dependency.name if dependency.name =~ /\.gem$/i
+    return dependency.name if /\.gem$/i.match?(dependency.name)
 
     specs = dependency.matching_specs
 
@@ -160,7 +154,7 @@ command help for an example.
     return Gem::RemoteFetcher.fetcher.download_to_cache(dependency) unless
       selected
 
-    return unless dependency.name =~ /^#{selected.name}$/i
+    return unless /^#{selected.name}$/i.match?(dependency.name)
 
     # We expect to find (basename).gem in the 'cache' directory.  Furthermore,
     # the name match must be exact (ignoring case).

@@ -28,7 +28,7 @@ class TestGemCommandsContentsCommand < Gem::TestCase
     end
 
     assert_match %r{lib/foo\.rb}, @ui.output
-    assert_match %r{Rakefile}, @ui.output
+    assert_match(/Rakefile/, @ui.output)
     assert_equal "", @ui.error
   end
 
@@ -44,7 +44,7 @@ class TestGemCommandsContentsCommand < Gem::TestCase
 
     assert_match %r{lib/foo\.rb}, @ui.output
     assert_match %r{lib/bar\.rb}, @ui.output
-    assert_match %r{Rakefile}, @ui.output
+    assert_match(/Rakefile/, @ui.output)
     assert_equal "", @ui.error
   end
 
@@ -57,8 +57,8 @@ class TestGemCommandsContentsCommand < Gem::TestCase
       end
     end
 
-    assert_match %r{Unable to find gem 'foo' in default gem paths}, @ui.output
-    assert_match %r{Directories searched:}, @ui.output
+    assert_match(/Unable to find gem 'foo' in default gem paths/, @ui.output)
+    assert_match(/Directories searched:/, @ui.output)
     assert_equal "", @ui.error
   end
 
@@ -72,7 +72,7 @@ class TestGemCommandsContentsCommand < Gem::TestCase
     end
 
     assert_match %r{lib/foo\.rb}, @ui.output
-    assert_match %r{Rakefile}, @ui.output
+    assert_match(/Rakefile/, @ui.output)
     assert_equal "", @ui.error
   end
 
@@ -87,7 +87,7 @@ class TestGemCommandsContentsCommand < Gem::TestCase
     end
 
     assert_match %r{lib/foo\.rb}, @ui.output
-    refute_match %r{Rakefile}, @ui.output
+    refute_match(/Rakefile/, @ui.output)
 
     assert_equal "", @ui.error
   end
@@ -148,7 +148,7 @@ class TestGemCommandsContentsCommand < Gem::TestCase
 
     assert_match %r{lib/foo\.rb}, @ui.output
     assert_match %r{lib/bar\.rb}, @ui.output
-    assert_match %r{Rakefile}, @ui.output
+    assert_match(/Rakefile/, @ui.output)
     assert_equal "", @ui.error
   end
 
@@ -227,7 +227,6 @@ lib/foo.rb
     default_gem_spec = new_default_spec("default", "2.0.0.0",
                                         nil, "default/gem.rb")
     default_gem_spec.executables = ["default_command"]
-    default_gem_spec.files += ["default_gem.so"]
     install_default_gems(default_gem_spec)
 
     @cmd.options[:args] = %w[default]
@@ -237,9 +236,8 @@ lib/foo.rb
     end
 
     expected = [
-      [RbConfig::CONFIG["bindir"], "default_command"],
-      [RbConfig::CONFIG["rubylibdir"], "default/gem.rb"],
-      [RbConfig::CONFIG["archdir"], "default_gem.so"],
+      [File.join(@gemhome, "bin"), "default_command"],
+      [File.join(@tempdir, "default_gems", "lib"), "default/gem.rb"],
     ].sort.map {|a|File.join a }.join "\n"
 
     assert_equal expected, @ui.output.chomp

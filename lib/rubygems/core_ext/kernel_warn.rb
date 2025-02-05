@@ -13,11 +13,7 @@ module Kernel
 
   module_function define_method(:warn) {|*messages, **kw|
     unless uplevel = kw[:uplevel]
-      if Gem.java_platform? && RUBY_VERSION < "3.1"
-        return original_warn.bind(self).call(*messages)
-      else
-        return original_warn.bind(self).call(*messages, **kw)
-      end
+      return original_warn.bind_call(self, *messages, **kw)
     end
 
     # Ensure `uplevel` fits a `long`
@@ -35,16 +31,15 @@ module Kernel
 
         start += 1
 
-        if path = loc.path
-          unless path.start_with?(rubygems_path, "<internal:")
-            # Non-rubygems frames
-            uplevel -= 1
-          end
+        next unless path = loc.path
+        unless path.start_with?(rubygems_path, "<internal:")
+          # Non-rubygems frames
+          uplevel -= 1
         end
       end
       kw[:uplevel] = start
     end
 
-    original_warn.bind(self).call(*messages, **kw)
+    original_warn.bind_call(self, *messages, **kw)
   }
 end

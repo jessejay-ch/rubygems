@@ -10,20 +10,19 @@ permissions:
 defaults:
   run:
     shell: bash
-    working-directory: ./bundler
 
 jobs:
   daily_bundler:
     name: Bundler (ruby-head)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: github.repository == 'rubygems/rubygems'
     env:
       RGV: ..
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@e6689b4deb1cb2062ea45315001f687c0b52111b # v1.144.1
+        uses: ruby/setup-ruby@2654679fe7f7c29875c669398a8ec0791b8a64a1 # v1.215.0
         with:
           ruby-version: ruby-head
           bundler: none
@@ -39,12 +38,11 @@ jobs:
       - name: Run Test
         run: |
           bin/rake spec:all
-
       - name: Get previous status
         if: always()
         run: echo "OLD_STATUS=$(curl -sS 'https://api.github.com/repos/rubygems/rubygems/actions/workflows/daily-bundler.yml/runs?event=schedule&branch=master' | jq '.workflow_runs | .[1].conclusion')" >> $GITHUB_ENV
 
-      - uses: 8398a7/action-slack@bdc6f9de222d3b7518e6cf99c4f3410f653cfde3 # v3.15.0
+      - uses: 8398a7/action-slack@28ba43ae48961b90635b50953d216767a6bea486 # v3.16.2
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow

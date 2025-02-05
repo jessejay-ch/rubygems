@@ -13,11 +13,25 @@ module RubyGems
     extend self
 
     def bundle_dev_gemfile(*args)
-      sh "ruby", "-I", "lib", "bundler/spec/support/bundle.rb", *args, "--gemfile=bundler/tool/bundler/dev_gems.rb"
+      sh "ruby", "-I", "lib", "bundler/spec/support/bundle.rb", *args, "--gemfile=tool/bundler/dev_gems.rb"
     end
 
     def bundle_support_gemfile(name, *args)
-      sh "ruby", "-I", "lib", "bundler/spec/support/bundle.rb", *args, "--gemfile=bundler/tool/bundler/#{name}.rb"
+      sh "ruby", "-I", "lib", "bundler/spec/support/bundle.rb", *args, "--gemfile=tool/bundler/#{name}.rb"
+    end
+
+    def update_locked_bundler
+      require "open3"
+
+      stdout, status = Open3.capture2e("ruby", "-I", "lib", "bundler/spec/support/bundle.rb", "--version")
+      raise "Failed to find current version of Bundler" unless status.success?
+
+      version = stdout.split(" ").last
+
+      Dir.glob("tool/bundler/*_gems.rb").each do |file|
+        name = File.basename(file, ".rb")
+        bundle_support_gemfile(name, "update", "--bundler", version)
+      end
     end
   end
 end
@@ -25,28 +39,36 @@ end
 desc "Setup Rubygems dev environment"
 task :setup do
   RubyGems::DevTasks.bundle_dev_gemfile "install"
-  RubyGems::DevTasks.bundle_support_gemfile "release_gems","lock"
-  RubyGems::DevTasks.bundle_support_gemfile "test_gems", "lock"
-  RubyGems::DevTasks.bundle_support_gemfile "rubocop_gems", "lock"
-  RubyGems::DevTasks.bundle_support_gemfile "standard_gems", "lock"
+  Dir.glob("tool/bundler/*_gems.rb").each do |file|
+    name = File.basename(file, ".rb")
+    next if name == "dev_gems"
+    RubyGems::DevTasks.bundle_support_gemfile name, "lock"
+  end
 end
 
 desc "Update Rubygems dev environment"
 task :update do
   RubyGems::DevTasks.bundle_dev_gemfile "update"
-  RubyGems::DevTasks.bundle_support_gemfile "release_gems", "lock", "--update"
-  RubyGems::DevTasks.bundle_support_gemfile "test_gems", "lock", "--update"
-  RubyGems::DevTasks.bundle_support_gemfile "rubocop_gems", "lock", "--update"
-  RubyGems::DevTasks.bundle_support_gemfile "standard_gems", "lock", "--update"
+  Dir.glob("tool/bundler/*_gems.rb").each do |file|
+    name = File.basename(file, ".rb")
+    next if name == "dev_gems"
+    RubyGems::DevTasks.bundle_support_gemfile name, "lock", "--update"
+  end
 end
 
-desc "Update the locked bundler version in dev environment"
-task :update_locked_bundler do |_, _args|
-  RubyGems::DevTasks.bundle_support_gemfile "dev_gems", "update", "--bundler"
-  RubyGems::DevTasks.bundle_support_gemfile "release_gems", "update", "--bundler"
-  RubyGems::DevTasks.bundle_support_gemfile "test_gems", "update", "--bundler"
-  RubyGems::DevTasks.bundle_support_gemfile "rubocop_gems", "update", "--bundler"
-  RubyGems::DevTasks.bundle_support_gemfile "standard_gems", "update", "--bundler"
+namespace :version do
+  desc "Update the locked bundler version in dev environment"
+  task update_locked_bundler: [:"bundler:install"] do |_, _args|
+    RubyGems::DevTasks.update_locked_bundler
+  end
+
+  desc "Check locked bundler version is up to date"
+  task check: :update_locked_bundler do
+    Spec::Rubygems.check_source_control_changes(
+      success_message: "Locked bundler version is out of sync",
+      error_message: "Please run `rake version:update_locked_bundler` and commit the result."
+    )
+  end
 end
 
 desc "Update specific development dependencies"
@@ -58,11 +80,7 @@ desc "Update RSpec related gems"
 task :update_rspec_deps do |_, _args|
   RubyGems::DevTasks.bundle_dev_gemfile "update", "rspec-core", "rspec-expectations", "rspec-mocks"
   RubyGems::DevTasks.bundle_support_gemfile "rubocop_gems", "lock", "--update", "rspec-core", "rspec-expectations", "rspec-mocks"
-  RubyGems::DevTasks.bundle_support_gemfile "rubocop23_gems", "lock", "--update", "rspec-core", "rspec-expectations", "rspec-mocks"
-  RubyGems::DevTasks.bundle_support_gemfile "rubocop24_gems", "lock", "--update", "rspec-core", "rspec-expectations", "rspec-mocks"
   RubyGems::DevTasks.bundle_support_gemfile "standard_gems", "lock", "--update", "rspec-core", "rspec-expectations", "rspec-mocks"
-  RubyGems::DevTasks.bundle_support_gemfile "standard23_gems", "lock", "--update", "rspec-core", "rspec-expectations", "rspec-mocks"
-  RubyGems::DevTasks.bundle_support_gemfile "standard24_gems", "lock", "--update", "rspec-core", "rspec-expectations", "rspec-mocks"
 end
 
 desc "Setup git hooks"
@@ -87,99 +105,72 @@ namespace "test" do
   end
 end
 
-task :default => :test
+task default: [:test, :spec]
 
-spec = Gem::Specification.load("rubygems-update.gemspec")
+spec = Gem::Specification.load(File.expand_path("rubygems-update.gemspec", __dir__))
 v = spec.version
 
 require "rdoc/task"
 
-RDoc::Task.new :rdoc => "docs", :clobber_rdoc => "clobber_docs" do |doc|
+RDoc::Task.new rdoc: "docs", clobber_rdoc: "clobber_docs" do |doc|
   doc.main   = "README.md"
   doc.title  = "RubyGems #{v} API Documentation"
 
   rdoc_files = Rake::FileList.new %w[lib bundler/lib]
-  rdoc_files.add %w[CHANGELOG.md LICENSE.txt MIT.txt CODE_OF_CONDUCT.md CONTRIBUTING.md
-                    MAINTAINERS.txt Manifest.txt POLICIES.md README.md UPGRADING.md bundler/CHANGELOG.md
-                    bundler/doc/contributing/README.md bundler/LICENSE.md bundler/README.md
+  rdoc_files.add %w[CHANGELOG.md LICENSE.txt MIT.txt CODE_OF_CONDUCT.md doc/rubygems/CONTRIBUTING.md
+                    doc/MAINTAINERS.txt Manifest.txt doc/rubygems/POLICIES.md README.md doc/rubygems/UPGRADING.md bundler/CHANGELOG.md
+                    doc/bundler/contributing/README.md bundler/LICENSE.md bundler/README.md
                     hide_lib_for_update/note.txt].map(&:freeze)
 
   doc.rdoc_files = rdoc_files
 
-  doc.rdoc_dir = "doc"
+  doc.rdoc_dir = "rdoc"
 end
 
-# No big deal if Automatiek is not available. This might be just because
-# `rake` is executed from release tarball.
-if File.exist?("util/automatiek.rake")
-  load "util/automatiek.rake"
-
-  # We currently ship Molinillo master branch as of
-  # https://github.com/CocoaPods/Molinillo/commit/7cc27a355e861bdf593e2cde7bf1bca3daae4303
-  Automatiek::RakeTask.new("molinillo") do |lib|
-    lib.version = "master"
-    lib.download = { :github => "https://github.com/CocoaPods/Molinillo" }
-    lib.namespace = "Molinillo"
-    lib.prefix = "Gem::Resolver"
-    lib.vendor_lib = "lib/rubygems/resolver/molinillo"
-    lib.license_path = "LICENSE"
-
-    lib.dependency("tsort") do |sublib|
-      sublib.version = "v0.1.1"
-      sublib.download = { :github => "https://github.com/ruby/tsort" }
-      sublib.namespace = "TSort"
-      sublib.prefix = "Gem"
-      sublib.vendor_lib = "lib/rubygems/tsort"
-      sublib.license_path = "LICENSE.txt"
-    end
+namespace :vendor do
+  desc "Download vendored gems to tmp"
+  task :bundle do
+    sh({ "BUNDLE_PATH" => "../../tmp/vendor", "BUNDLER_GEM_DEFAULT_DIR" => "../../tmp/vendor" }, "ruby", "--disable-gems", "-r./bundler/spec/support/hax.rb", "-I", "lib", "bundler/spec/support/bundle.rb", "install", "--gemfile=tool/bundler/vendor_gems.rb")
   end
 
-  # We currently ship optparse 0.3.0 plus the following changes:
-  # * Remove top aliasing the `::OptParse` constant to `OptionParser`, since we
-  #   don't need it and it triggers redefinition warnings since the default
-  #   optparse gem also does the aliasing.
-  # * Add an empty .document file to the library's root path to hint RDoc that
-  #   this library should not be documented.
-  desc "Vendor a specific version of optparse"
-  Automatiek::RakeTask.new("optparse") do |lib|
-    lib.version = "v0.3.0"
-    lib.download = { :github => "https://github.com/ruby/optparse" }
-    lib.namespace = "OptionParser"
-    lib.prefix = "Gem"
-    lib.vendor_lib = "lib/rubygems/optparse"
-    lib.license_path = "COPYING"
+  desc "Install patched vendored gems"
+  task install: :bundle do
+    sh({ "BUNDLE_GEMFILE" => "tool/bundler/vendor_gems.rb", "BUNDLE_PATH" => "../../tmp/vendor", "BUNDLER_GEM_DEFAULT_DIR" => "../../tmp/vendor" }, "ruby", "-rpathname", "-r./bundler/spec/support/hax.rb", "-I", "lib", "bundler/spec/support/bundle.rb", "exec", "tool/automatiek/vendor.rb")
+  end
+
+  desc "Check vendored gems are up to date"
+  task check: :install do
+    Spec::Rubygems.check_source_control_changes(
+      success_message: "Vendored gems are in sync",
+      error_message: "Vendored gems are out of sync. Please update the vendored lib patches."
+    )
   end
 end
 
 namespace :rubocop do
   desc "Setup gems necessary to lint Ruby code"
   task(:setup) do
-    sh "ruby", "-I", "lib", "bundler/spec/support/bundle.rb", "install", "--gemfile=bundler/tool/bundler/lint_gems.rb"
+    sh "ruby", "-I", "lib", "bundler/spec/support/bundle.rb", "install", "--gemfile=tool/bundler/lint_gems.rb"
   end
 
-  desc "Run rubocop for RubyGems. Pass positional arguments, e.g. -a, as Rake arguments."
-  task(:rubygems) do |_, args|
-    sh "util/rubocop", *args
-  end
-
-  desc "Run rubocop for Bundler. Pass positional arguments, e.g. -a, as Rake arguments."
-  task(:bundler) do |_, args|
-    sh "bundler/bin/rubocop", *args
+  desc "Run rubocop. Pass positional arguments as Rake arguments, e.g. `rake 'rubocop:run[-a]'`"
+  task :run do |_, args|
+    sh "bin/rubocop", *args
   end
 end
 
-task rubocop: %w[rubocop:setup rubocop:rubygems rubocop:bundler]
+task rubocop: %w[rubocop:setup rubocop:run]
 
 # --------------------------------------------------------------------
 # Creating a release
 
-task :prerelease => %w[clobber install_release_dependencies test bundler:build_metadata check_deprecations]
-task :postrelease => %w[upload guides:publish blog:publish bundler:build_metadata:clean]
+task prerelease: %w[clobber install_release_dependencies test bundler:build_metadata check_deprecations]
+task postrelease: %w[upload guides:publish blog:publish bundler:build_metadata:clean]
 
 desc "Check for deprecated methods with expired deprecation horizon"
 task :check_deprecations do
   if v.segments[1] == 0 && v.segments[2] == 0
-    sh("util/rubocop -r ./util/cops/deprecations --only Rubygems/Deprecations")
+    sh("bin/rubocop -r ./tool/cops/deprecations --only Rubygems/Deprecations")
   else
     puts "Skipping deprecation checks since not releasing a major version."
   end
@@ -187,21 +178,21 @@ end
 
 desc "Install release dependencies"
 task :install_release_dependencies do
-  require_relative "util/release"
+  require_relative "tool/release"
 
   Release.install_dependencies!
 end
 
 desc "Prepare a release"
 task :prepare_release, [:version] => [:install_release_dependencies] do |_t, opts|
-  require_relative "util/release"
+  require_relative "tool/release"
 
   Release.new(opts[:version] || v.to_s).prepare!
 end
 
 desc "Install rubygems to local system"
-task :install => [:clear_package, :package] do
-  sh "ruby -Ilib bin/gem install --no-document pkg/rubygems-update-#{v}.gem --backtrace && update_rubygems --no-document --backtrace"
+task install: [:clear_package, :package] do
+  sh "ruby -Ilib exe/gem install --no-document pkg/rubygems-update-#{v}.gem --backtrace && update_rubygems --no-document --backtrace"
 end
 
 desc "Clears previously built package"
@@ -209,15 +200,15 @@ task :clear_package do
   rm_rf "pkg"
 end
 
-desc "Generates the changelog for a specific target version"
-task :generate_changelog, [:version] do |_t, opts|
-  require_relative "util/release"
+desc "Generates the RubyGems changelog for a specific target version"
+task :generate_changelog, [:version] => [:install_release_dependencies] do |_t, opts|
+  require_relative "tool/release"
 
   Release.for_rubygems(opts[:version]).cut_changelog!
 end
 
 desc "Release rubygems-#{v}"
-task :release => :prerelease do
+task release: :prerelease do
   Rake::Task["package"].invoke
   sh "gem push pkg/rubygems-update-#{v}.gem"
   Rake::Task["postrelease"].invoke
@@ -261,7 +252,8 @@ file "pkg/rubygems-#{v}.tgz" => "pkg/rubygems-#{v}" do
     tar_version = `tar --version`
     if tar_version.include?("bsdtar")
       # bsdtar, as used by at least FreeBSD and macOS, uses `--uname` and `--gname`.
-      sh "tar -czf rubygems-#{v}.tgz --uname=rubygems:0 --gname=rubygems:0 rubygems-#{v}"
+      # COPYFILE_DISABLE prevents storing macOS extended attribute data in `._*` files inside the archive
+      sh({ "COPYFILE_DISABLE" => "1" }, "tar -czf rubygems-#{v}.tgz --uname=rubygems:0 --gname=rubygems:0 rubygems-#{v}")
     else # If a third variant is added, change this line to: elsif tar_version =~ /GNU tar/
       # GNU Tar, as used by many Linux distros, uses `--owner` and `--group`.
       sh "tar -czf rubygems-#{v}.tgz --owner=rubygems:0 --group=rubygems:0 rubygems-#{v}"
@@ -271,7 +263,7 @@ end
 
 desc "Upload the release to GitHub releases"
 task :upload_to_github do
-  require_relative "util/release"
+  require_relative "tool/release"
 
   Release.for_rubygems(v).create_for_github!
 end
@@ -288,7 +280,7 @@ task :upload_to_s3 do
 end
 
 desc "Upload release to rubygems.org"
-task :upload => %w[upload_to_github upload_to_s3]
+task upload: %w[upload_to_github upload_to_s3]
 
 directory "../guides.rubygems.org" do
   sh "git", "clone",
@@ -355,8 +347,8 @@ namespace "blog" do
       digest = OpenSSL::Digest::SHA256.file(file).hexdigest
       basename = File.basename(file)
 
-      checksums << "* #{basename}  \n"
-      checksums << "  #{digest}\n"
+      checksums += "* #{basename}  \n"
+      checksums += "  #{digest}\n"
 
       release_url = URI("https://rubygems.org/#{file.end_with?("gem") ? "gems" : "rubygems"}/#{basename}")
       response = Net::HTTP.get_response(release_url)
@@ -389,7 +381,7 @@ namespace "blog" do
     name  = `git config --get user.name`.strip
     email = `git config --get user.email`.strip
 
-    require_relative "util/changelog"
+    require_relative "tool/changelog"
     history = Changelog.for_rubygems(v.to_s)
 
     require "tempfile"
@@ -458,14 +450,23 @@ module Rubygems
   class ProjectFiles
     def self.all
       files = []
-      exclude = %r{\A(?:\.|bundler/(?!lib|exe|[^/]+\.md|bundler.gemspec)|util/|Rakefile)}
+      exclude = %r{\A(?:\.|bundler/(?!lib|exe|[^/]+\.md|bundler.gemspec)|tool/|Rakefile|bin|test|doc)}
       tracked_files = `git ls-files`.split("\n")
 
       tracked_files.each do |path|
         next unless File.file?(path)
-        next if path =~ exclude
+        next if path&.match?(exclude)
         files << path
       end
+
+      # Restore important documents
+      %w[
+        doc/MAINTAINERS.txt
+        doc/bundler/UPGRADING.md
+        doc/rubygems/CONTRIBUTING.md
+        doc/rubygems/POLICIES.md
+        doc/rubygems/UPGRADING.md
+      ].each {|f| files << f }
 
       files.sort
     end
@@ -484,19 +485,247 @@ task :check_manifest do
   end
 end
 
+license_last_update = nil
+
 desc "Update License list from SPDX.org"
 task :update_licenses do
-  load "util/generate_spdx_license_list.rb"
+  load "tool/generate_spdx_license_list.rb"
+  license_last_update = generate_spdx_license_list
+end
+
+desc "Create branch to update License list"
+task update_licenses_branch: :update_licenses do
+  if license_last_update
+    file, mtime = license_last_update
+    date = mtime.strftime("%Y-%m-%d")
+    branch_name = "license-list-#{date}"
+
+    require "open3"
+    stdout, stderr, status = Open3.capture3(*%w[git ls-remote --heads origin], "refs/heads/#{branch_name}")
+    raise stderr unless status.success?
+
+    if stdout.empty?
+      system(*%w[git checkout -b], branch_name, exception: true)
+      system(*%w[git commit -m], "Update SPDX license list as of #{date}", *file, exception: true)
+    else
+      puts "A license update PR already exists"
+    end
+  else
+    puts "Licenses are in sync"
+  end
+end
+
+require_relative "bundler/spec/support/rubygems_ext"
+
+desc "Run specs"
+task :spec do
+  chdir("bundler") do
+    sh("bin/rspec")
+  end
+end
+
+namespace :dev do
+  desc "Ensure dev dependencies are installed"
+  task :deps do
+    Spec::Rubygems.dev_setup
+  end
+
+  desc "Ensure dev dependencies are installed, and make sure no lockfile changes are generated"
+  task frozen_deps: :deps do
+    Spec::Rubygems.check_source_control_changes(
+      success_message: "Development dependencies were installed and the lockfile is in sync",
+      error_message: "Development dependencies were installed but the lockfile is out of sync. Commit the updated lockfile and try again"
+    )
+  end
+end
+
+namespace :spec do
+  desc "Ensure spec dependencies are installed"
+  task deps: "dev:deps" do
+    chdir("bundler") do
+      Spec::Rubygems.install_test_deps
+    end
+  end
+
+  desc "Ensure spec dependencies for running in parallel are installed"
+  task parallel_deps: "dev:deps" do
+    chdir("bundler") do
+      Spec::Rubygems.install_parallel_test_deps
+    end
+  end
+
+  desc "Run all specs"
+  task all: %w[spec:regular spec:realworld]
+
+  desc "Run the regular spec suite"
+  task :regular do
+    chdir("bundler") do
+      sh("bin/parallel_rspec")
+    end
+  end
+
+  desc "Run the real-world spec suite"
+  task :realworld do
+    chdir("bundler") do
+      sh("BUNDLER_SPEC_PRE_RECORDED=1 bin/rspec --tag realworld")
+    end
+  end
+
+  namespace :realworld do
+    desc "Re-record cassettes for the realworld specs"
+    task :record do
+      chdir("bundler") do
+        sh("rm -rf spec/support/artifice/vcr_cassettes && bin/rspec --tag realworld")
+      end
+    end
+
+    task :check_unused_cassettes do
+      chdir("bundler") do
+        used_cassettes = Dir.glob("spec/support/artifice/used_vcr_cassettes/**/*.txt").flat_map {|f| File.readlines(f).map(&:strip) }
+        all_cassettes = Dir.glob("spec/support/artifice/vcr_cassettes/**/*").select {|f| File.file?(f) }
+        unused_cassettes = all_cassettes - used_cassettes
+
+        raise "The following cassettes are unused:\n#{unused_cassettes.join("\n")}\n" if unused_cassettes.any?
+
+        puts "No cassettes unused"
+      end
+    end
+  end
+end
+
+desc "Check RVM integration"
+task :check_rvm_integration do
+  # The rubygems-bundler gem is installed by RVM by default and it could easily
+  # break when we change bundler. Make sure that binstubs still run with it
+  # installed.
+  sh("RUBYOPT=-Ilib gem install rubygems-bundler rake && RUBYOPT=-Ibundler/lib rake -T")
+end
+
+desc "Check RubyGems integration"
+task :check_rubygems_integration do
+  # Bundler monkeypatches RubyGems in some ways that could potentially break gem activation.
+
+  # Run a non trivial binstub activation, with two different versions of a dependent gem installed.
+  sh("ruby -Ilib -S gem install reline:0.3.0 reline:0.3.1 irb && ruby -Ibundler/lib -rbundler -S irb --version")
+
+  # With two psych versions installed, load a gem that depends on pysch and then load rubygems extensions.
+  sh("ruby -Ilib -S gem install psych:5.1.1 psych:5.1.2 rdoc && ruby -Ibundler/lib -rrdoc/task -rbundler/rubygems_ext -e1")
+end
+
+namespace :man do
+  if RUBY_ENGINE == "jruby"
+    task(:build) {}
+  else
+    file "index.txt" do
+      index = Dir["bundler/lib/bundler/man/*.ronn"].map do |ronn|
+        roff = "#{File.dirname(ronn)}/#{File.basename(ronn, ".ronn")}"
+        [ronn, roff]
+      end
+      index.map! do |(ronn, roff)|
+        date = ENV["MAN_PAGES_DATE"] || Time.now.strftime("%Y-%m-%d")
+        sh "bin/ronn --warnings --roff --pipe --date #{date} #{ronn} > #{roff}"
+        [File.read(ronn).split(" ").first, File.basename(roff)]
+      end
+      index = index.sort_by(&:first)
+      justification = index.map {|(n, _f)| n.length }.max + 4
+      File.open("bundler/lib/bundler/man/index.txt", "w") do |f|
+        index.each do |name, filename|
+          f << name.ljust(justification) << filename << "\n"
+        end
+      end
+    end
+    task build_all_pages: "index.txt"
+
+    desc "Make sure ronn-ng is installed"
+    task :check_ronn do
+      Spec::Rubygems.gem_require("ronn-ng", "ronn")
+    rescue Gem::LoadError => e
+      abort("We couldn't activate ronn-ng (#{e.requirement}). Try `gem install ronn-ng:'#{e.requirement}'` to be able to build the help pages")
+    end
+
+    desc "Remove all built man pages"
+    task :clean do
+      leftovers = Dir["bundler/lib/bundler/man/*"].reject do |f|
+        File.extname(f) == ".ronn"
+      end
+      rm leftovers if leftovers.any?
+    end
+
+    desc "Build the man pages"
+    task build: [:check_ronn, :clean, :build_all_pages]
+
+    desc "Sets target date for building man pages to the one currently present"
+    task :set_current_date do
+      require "date"
+      ENV["MAN_PAGES_DATE"] = Date.parse(File.readlines("bundler/lib/bundler/man/bundle-add.1")[2].split('"')[5]).strftime("%Y-%m-%d")
+    end
+
+    desc "Verify man pages are in sync"
+    task check: [:check_ronn, :set_current_date, :build] do
+      Spec::Rubygems.check_source_control_changes(
+        success_message: "Man pages are in sync",
+        error_message: "Man pages are out of sync. Please run `rake man:build` and commit the results."
+      )
+    end
+  end
+end
+
+task :override_version do
+  next unless version = ENV["BUNDLER_SPEC_SUB_VERSION"]
+  Spec::Path.replace_version_file(version)
 end
 
 namespace :bundler do
+  chdir(File.expand_path("bundler", __dir__)) do
+    require_relative "bundler/lib/bundler/gem_tasks"
+  end
+  require_relative "bundler/spec/support/build_metadata"
+  require_relative "tool/release"
+
+  Bundler::GemHelper.tag_prefix = "bundler-"
+
   task :build_metadata do
-    chdir("bundler") { sh "rake build_metadata" }
+    Spec::BuildMetadata.write_build_metadata
   end
 
   namespace :build_metadata do
     task :clean do
-      chdir("bundler") { sh "rake build_metadata:clean" }
+      Spec::BuildMetadata.reset_build_metadata
     end
+  end
+
+  task build: ["bundler:build_metadata"] do
+    Rake::Task["bundler:build_metadata:clean"].tap(&:reenable).invoke
+  end
+
+  desc "Push to rubygems.org"
+  task "release:rubygem_push" => ["bundler:release:setup", "man:check", "bundler:build_metadata", "bundler:release:github"]
+
+  desc "Generates the Bundler changelog for a specific target version"
+  task :generate_changelog, [:version] => [:install_release_dependencies] do |_t, opts|
+    Release.for_bundler(opts[:version]).cut_changelog!
+  end
+
+  namespace :release do
+    desc "Install gems needed for releasing"
+    task :setup do
+      Release.install_dependencies!
+    end
+
+    desc "Push the release to GitHub releases"
+    task :github do
+      gemspec_version = Bundler::GemHelper.gemspec.version
+
+      Release.for_bundler(gemspec_version).create_for_github!
+    end
+  end
+end
+
+namespace :bundler3 do
+  task :install do
+    ENV["BUNDLER_SPEC_SUB_VERSION"] = "3.0.0"
+    Rake::Task["override_version"].invoke
+    Rake::Task["install"].invoke
+    sh("git", "checkout", "--", "bundler/lib/bundler/version.rb")
   end
 end

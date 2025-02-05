@@ -92,9 +92,7 @@ class Gem::Resolver::ActivationRequest
   end
 
   def inspect # :nodoc:
-    "#<%s for %p from %s>" % [
-      self.class, @spec, @request
-    ]
+    format("#<%s for %p from %s>", self.class, @spec, @request)
   end
 
   ##
@@ -108,7 +106,7 @@ class Gem::Resolver::ActivationRequest
       this_spec = full_spec
 
       Gem::Specification.any? do |s|
-        s == this_spec
+        s == this_spec && s.base_dir == this_spec.base_dir
       end
     end
   end

@@ -15,9 +15,10 @@ class Gem::Commands::EnvironmentCommand < Gem::Command
           version         display the gem format version
           remotesources   display the remote gem servers
           platform        display the supported gem platforms
+          credentials     display the path where credentials are stored
           <omitted>       display everything
     EOF
-    return args.gsub(/^\s+/, "")
+    args.gsub(/^\s+/, "")
   end
 
   def description # :nodoc:
@@ -88,6 +89,8 @@ lib/rubygems/defaults/operating_system.rb
         Gem.sources.to_a.join("\n")
       when /^platform/ then
         Gem.platforms.join(File::PATH_SEPARATOR)
+      when /^credentials/, /^creds/ then
+        Gem.configuration.credentials_path
       when nil then
         show_environment
       else
@@ -113,6 +116,8 @@ lib/rubygems/defaults/operating_system.rb
     out << "  - INSTALLATION DIRECTORY: #{Gem.dir}\n"
 
     out << "  - USER INSTALLATION DIRECTORY: #{Gem.user_dir}\n"
+
+    out << "  - CREDENTIALS FILE: #{Gem.configuration.credentials_path}\n"
 
     out << "  - RUBYGEMS PREFIX: #{Gem.prefix}\n" unless Gem.prefix.nil?
 
@@ -171,6 +176,6 @@ lib/rubygems/defaults/operating_system.rb
       end
     end
 
-    return nil
+    nil
   end
 end

@@ -2,7 +2,10 @@ name: truffleruby-bundler
 
 on:
   pull_request:
-  merge_group:
+
+  push:
+    branches:
+      - master
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -14,19 +17,18 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 defaults:
   run:
     shell: bash
-    working-directory: ./bundler
 
 jobs:
   truffleruby_bundler:
     name: Bundler (Truffleruby)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup ruby
-        uses: ruby/setup-ruby@e6689b4deb1cb2062ea45315001f687c0b52111b # v1.144.1
+        uses: ruby/setup-ruby@2654679fe7f7c29875c669398a8ec0791b8a64a1 # v1.215.0
         with:
-          ruby-version: truffleruby-22.3
+          ruby-version: truffleruby-24.1.2
           bundler: none
       - name: Prepare dependencies
         run: |
@@ -34,4 +36,5 @@ jobs:
       - name: Run Test
         run: |
           bin/parallel_rspec --tag truffleruby_only --tag truffleruby
+        working-directory: ./bundler
     timeout-minutes: 20

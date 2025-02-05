@@ -5,8 +5,6 @@ require_relative "helper"
 require "rubygems/rdoc"
 
 class TestGemRDoc < Gem::TestCase
-  Gem::RDoc.load_rdoc
-
   def setup
     super
 
@@ -20,10 +18,16 @@ class TestGemRDoc < Gem::TestCase
 
     install_gem @a
 
-    @hook = Gem::RDoc.new @a
+    hook_class = if defined?(RDoc::RubyGemsHook)
+      RDoc::RubyGemsHook
+    else
+      Gem::RDoc
+    end
+
+    @hook = hook_class.new @a
 
     begin
-      Gem::RDoc.load_rdoc
+      hook_class.load_rdoc
     rescue Gem::DocumentError => e
       pend e.message
     end
@@ -100,7 +104,7 @@ class TestGemRDoc < Gem::TestCase
 
     assert_equal @a.base_dir, e.directory
   ensure
-    FileUtils.chmod(0755, @a.base_dir) if File.directory?(@a.base_dir)
+    FileUtils.chmod(0o755, @a.base_dir) if File.directory?(@a.base_dir)
   end
 
   def test_ri_installed?
@@ -130,8 +134,8 @@ class TestGemRDoc < Gem::TestCase
     assert_equal @a.doc_dir, e.directory
   ensure
     if File.exist? @a.doc_dir
-      FileUtils.chmod 0755, @a.doc_dir
+      FileUtils.chmod 0o755, @a.doc_dir
       FileUtils.rm_r @a.doc_dir
     end
   end
-end
+end if defined?(Gem::RDoc)

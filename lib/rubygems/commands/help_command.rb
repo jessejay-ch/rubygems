@@ -59,7 +59,7 @@ multiple environments.  The RubyGems implementation is designed to be
 compatible with Bundler's Gemfile format.  You can see additional
 documentation on the format at:
 
-  http://bundler.io
+  https://bundler.io
 
 RubyGems automatically looks for these gem dependencies files:
 
@@ -172,7 +172,7 @@ and #platforms methods:
 See the bundler Gemfile manual page for a list of platforms supported in a gem
 dependencies file.:
 
-  http://bundler.io/v1.6/man/gemfile.5.html
+  https://bundler.io/v2.5/man/gemfile.5.html
 
 Ruby Version and Engine Dependency
 ==================================
@@ -333,7 +333,7 @@ platform.
     @command_manager.command_names.each do |cmd_name|
       command = @command_manager[cmd_name]
 
-      next if command.deprecated?
+      next if command&.deprecated?
 
       summary =
         if command
@@ -343,7 +343,7 @@ platform.
         end
 
       summary = wrap(summary, summary_width).split "\n"
-      out << sprintf(format, cmd_name, summary.shift)
+      out << format(format, cmd_name, summary.shift)
       until summary.empty? do
         out << "#{wrap_indent}#{summary.shift}"
       end

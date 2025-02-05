@@ -11,8 +11,6 @@ class TestGemCommandsHelpCommand < Gem::TestCase
     super
 
     @cmd = Gem::Commands::HelpCommand.new
-
-    load File.expand_path("rubygems_plugin.rb", __dir__) unless Gem::Commands.const_defined? :InterruptCommand
   end
 
   def test_gem_help_bad
@@ -56,7 +54,7 @@ class TestGemCommandsHelpCommand < Gem::TestCase
       if Gem::HAVE_OPENSSL
         assert_empty err
 
-        refute_match %r{No command found for }, out
+        refute_match(/No command found for /, out)
       end
     end
   end

@@ -5,13 +5,10 @@ on:
     paths:
       - bundler/**
       - .github/workflows/system-rubygems-bundler.yml
-      - .rubocop_bundler.yml
 
-  merge_group:
-    paths:
-      - bundler/**
-      - .github/workflows/system-rubygems-bundler.yml
-      - .rubocop_bundler.yml
+  push:
+    branches:
+      - master
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -23,49 +20,48 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 defaults:
   run:
     shell: bash
-    working-directory: ./bundler
 
 jobs:
   system_rubygems_bundler:
     name: Bundler ${{ matrix.bundler.name }} against system Rubygems (${{ matrix.ruby.name }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-2.6, value: 2.6.10 } }
-          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-2.7, value: 2.7.7 } }
-          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-3.0, value: 3.0.5 } }
-          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-3.1, value: 3.1.3 } }
-          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-3.2, value: 3.2.1 } }
-          - { bundler: { name: 3, value: 3.0.0 }, ruby: { name: ruby-2.7, value: 2.7.7 } }
-          - { bundler: { name: 3, value: 3.0.0 }, ruby: { name: ruby-3.0, value: 3.0.5 } }
-          - { bundler: { name: 3, value: 3.0.0 }, ruby: { name: ruby-3.1, value: 3.1.3 } }
-          - { bundler: { name: 3, value: 3.0.0 }, ruby: { name: ruby-3.2, value: 3.2.1 } }
+          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-3.1, value: 3.1.0 } }
+          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-3.2, value: 3.2.0 } }
+          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-3.3, value: 3.3.0 } }
+          - { bundler: { name: 2, value: '' }, ruby: { name: ruby-3.4, value: 3.4.1 } }
+          - { bundler: { name: 3, value: 3.0.0 }, ruby: { name: ruby-3.1, value: 3.1.0 } }
+          - { bundler: { name: 3, value: 3.0.0 }, ruby: { name: ruby-3.2, value: 3.2.0 } }
+          - { bundler: { name: 3, value: 3.0.0 }, ruby: { name: ruby-3.3, value: 3.3.0 } }
+          - { bundler: { name: 3, value: 3.0.0 }, ruby: { name: ruby-3.4, value: 3.4.1 } }
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup ruby
-        uses: ruby/setup-ruby@e6689b4deb1cb2062ea45315001f687c0b52111b # v1.144.1
+        uses: ruby/setup-ruby@2654679fe7f7c29875c669398a8ec0791b8a64a1 # v1.215.0
         with:
           ruby-version: ${{ matrix.ruby.value }}
           bundler: none
       - name: Install graphviz
         run: sudo apt-get install graphviz -y
         if: matrix.bundler.value == ''
-      - name: Prepare dependencies
-        run: |
-          bin/rake spec:parallel_deps
       - name: Replace version
         run: BUNDLER_SPEC_SUB_VERSION=${{ matrix.bundler.value }} bin/rake override_version
         if: matrix.bundler.value != ''
+      - name: Prepare dependencies
+        run: |
+          bin/rake spec:parallel_deps
       - name: Run Test
         run: |
           bin/parallel_rspec
+        working-directory: ./bundler
       - name: Save system RubyGems version to ENV
         run: |
           RGV=$(ruby -e 'puts Gem::VERSION.split(".")[0..2].join(".")')
           echo "RGV=v$RGV" >> $GITHUB_ENV
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           path: bundler/tmp/rubygems
           ref: ${{ env.RGV }}

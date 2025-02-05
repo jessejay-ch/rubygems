@@ -1,30 +1,21 @@
 HTTP/1.1 200 OK
 connection: keep-alive
-content-length: 45480
-content-type: text/plain; charset=utf-8
-x-frame-options: SAMEORIGIN
-x-xss-protection: 1; mode=block
-x-content-type-options: nosniff
-x-download-options: noopen
-x-permitted-cross-domain-policies: none
-referrer-policy: strict-origin-when-cross-origin
-etag: "c5d2ca8e9fbe5e799adadce678033886"
-last-modified: Mon, 19 Dec 2022 09:04:13 GMT
+content-length: 46162
+last-modified: Tue, 05 Dec 2023 20:47:58 GMT
+etag: "60627e69e308d5840debd8d1402a06cb"
 cache-control: max-age=60, public
-content-security-policy: default-src 'self'; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://secure.gaug.es https://gravatar.com https://secure.gravatar.com https://*.fastly-insights.com; object-src 'none'; script-src 'self' https://secure.gaug.es https://www.fastly-insights.com; style-src 'self' https://fonts.googleapis.com; connect-src 'self' https://s3-us-west-2.amazonaws.com/rubygems-dumps/ https://*.fastly-insights.com https://fastly-insights.com https://api.github.com; form-action 'self'; frame-ancestors 'self'
-x-request-id: b2c58329-57d5-4291-8e99-26bbb7df1457
-x-runtime: 0.017396
-strict-transport-security: max-age=31536000
-x-backend: F_Rails 52.43.103.69:443
+content-type: text/plain; charset=utf-8
+digest: sha-256="QG6bl4OxZfx4sV33ovjnZqUyXxz0c8cdsBDY/Y1LAHc="
+repr-digest: sha-256="QG6bl4OxZfx4sV33ovjnZqUyXxz0c8cdsBDY/Y1LAHc="
+via: 1.1 varnish, 1.1 varnish
+x-backend: fastlyshield--shield_ssl_cache_bfi_krnt7300079_BFI 167.82.143.79:443
 accept-ranges: bytes
-date: Tue, 27 Dec 2022 11:24:50 GMT
-via: 1.1 varnish
-age: 793
-x-served-by: cache-mad22084-MAD
-x-cache: HIT
-x-cache-hits: 1
-x-timer: S1672140290.038079,VS0,VE2
-vary: Accept,Accept-Encoding
+date: Fri, 15 Dec 2023 19:03:07 GMT
+age: 3440
+x-served-by: cache-bfi-krnt7300079-BFI, cache-mad22044-MAD
+x-cache: HIT, MISS
+x-cache-hits: 5003, 0
+x-timer: S1702666987.166246,VS0,VE214
 server: RubyGems.org
 
 ---
@@ -203,3 +194,5 @@ server: RubyGems.org
 0.47.1 backport:~> 1.2,benchmark:>= 0,bundler:>= 1.17.2,diff-lcs:~> 1.4,e2mmap:>= 0,jaro_winkler:~> 1.5,kramdown:~> 2.3,kramdown-parser-gfm:~> 1.1,parser:~> 3.0,reverse_markdown:< 3&>= 1.0.5,rubocop:>= 0.52,thor:~> 1.0,tilt:~> 2.0,yard:>= 0.9.24&~> 0.9|checksum:292f6b4dd195bd5f8e7327446a8fb2c42b227a70140d95f3476d35130e158955,ruby:>= 2.4
 0.47.2 backport:~> 1.2,benchmark:>= 0,bundler:>= 1.17.2,diff-lcs:~> 1.4,e2mmap:>= 0,jaro_winkler:~> 1.5,kramdown:~> 2.3,kramdown-parser-gfm:~> 1.1,parser:~> 3.0,reverse_markdown:< 3&>= 1.0.5,rubocop:>= 0.52,thor:~> 1.0,tilt:~> 2.0,yard:>= 0.9.24&~> 0.9|checksum:87ca4b799b9155c2c31c15954c483e952fdacd800f52d6709b901dd447bcac6a,ruby:>= 2.4
 0.48.0 backport:~> 1.2,benchmark:>= 0,bundler:>= 1.17.2,diff-lcs:~> 1.4,e2mmap:>= 0,jaro_winkler:~> 1.5,kramdown:~> 2.3,kramdown-parser-gfm:~> 1.1,parser:~> 3.0,reverse_markdown:< 3&>= 1.0.5,rubocop:>= 0.52,thor:~> 1.0,tilt:~> 2.0,yard:>= 0.9.24&~> 0.9|checksum:f1019acaf3268dbe1178538e6a0ab95e89a2c599c5098952b7d339788b13bedd,ruby:>= 2.4
+0.49.0 backport:~> 1.2,benchmark:>= 0,bundler:~> 2.0,diff-lcs:~> 1.4,e2mmap:>= 0,jaro_winkler:~> 1.5,kramdown:~> 2.3,kramdown-parser-gfm:~> 1.1,parser:~> 3.0,rbs:~> 2.0,reverse_markdown:~> 2.0,rubocop:~> 1.38,thor:~> 1.0,tilt:~> 2.0,yard:>= 0.9.24&~> 0.9|checksum:e8e0fcb03b664913bc2f8d0bb10eb2bb717b7ea54a7219dcc702f15785aa97a3,ruby:>= 2.6
+0.50.0 backport:~> 1.2,benchmark:>= 0,bundler:~> 2.0,diff-lcs:~> 1.4,e2mmap:>= 0,jaro_winkler:~> 1.5,kramdown:~> 2.3,kramdown-parser-gfm:~> 1.1,parser:~> 3.0,rbs:~> 2.0,reverse_markdown:~> 2.0,rubocop:~> 1.38,thor:~> 1.0,tilt:~> 2.0,yard:>= 0.9.24&~> 0.9|checksum:278d0f7de7181376a64d54a55b5df1a22ce8aa1d0e6a103ff76bf34cb37e7261,ruby:>= 2.6

@@ -2,7 +2,10 @@ name: install-rubygems
 
 on:
   pull_request:
-  merge_group:
+
+  push:
+    branches:
+      - master
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -14,25 +17,24 @@ permissions:  # added using https://github.com/step-security/secure-workflows
 jobs:
   install_rubygems_ubuntu:
     name: Install Rubygems on Ubuntu (${{ matrix.ruby.name }}, ${{ matrix.openssl.name }})
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         ruby:
-          - { name: "2.6", value: 2.6.10 }
-          - { name: "2.7", value: 2.7.7 }
-          - { name: "3.0", value: 3.0.5 }
-          - { name: "3.1", value: 3.1.3 }
-          - { name: "3.2", value: 3.2.1 }
-          - { name: jruby-9.4, value: jruby-9.4.2.0 }
-          - { name: truffleruby-22, value: truffleruby-22.3.0 }
+          - { name: "3.1", value: 3.1.6 }
+          - { name: "3.2", value: 3.2.6 }
+          - { name: "3.3", value: 3.3.7 }
+          - { name: "3.4", value: 3.4.1 }
+          - { name: jruby, value: jruby-9.4.10.0 }
+          - { name: truffleruby, value: truffleruby-24.1.2 }
         openssl:
           - { name: "openssl", value: true }
           - { name: "no-openssl", value: false }
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup ruby
-        uses: ruby/setup-ruby@e6689b4deb1cb2062ea45315001f687c0b52111b # v1.144.1
+        uses: ruby/setup-ruby@2654679fe7f7c29875c669398a8ec0791b8a64a1 # v1.215.0
         with:
           ruby-version: ${{ matrix.ruby.value }}
           bundler: none
@@ -83,8 +85,18 @@ jobs:
       - name: Check bundler install didn't hit the network
         run: if grep -q 'GET http' output.txt; then false; else true; fi
         working-directory: ./bundler
+      - name: Check gem exec can create a rails project
+        run: gem exec rails new app --minimal
+        if: matrix.ruby.name != 'truffleruby' && matrix.ruby.name != 'jruby'
       - name: Check rails can be installed
         run: gem install rails --verbose --backtrace
+      - name: Install and load a gem that defines a command as a plugin
+        run: |
+          gem install nexus:1.5.2
+          gem nexus --help
+      - name: Check gem exec preserves app name
+        run: gem exec kamal help | grep -q 'kamal help'
+        if: matrix.ruby.name != 'truffleruby' && matrix.ruby.name != 'jruby'
     timeout-minutes: 10
 
   install_rubygems_windows:
@@ -94,18 +106,20 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - { name: "3.1", value: 3.1.3 } # Rails 7
-          - { name: "3.2", value: 3.2.1 } # Rails 7
-          - { name: jruby-9.4, value: jruby-9.4.2.0, rails-args: "--skip-webpack-install" } # Rails 6
+          - { name: "3.1", value: 3.1.6 }
+          - { name: "3.2", value: 3.2.6 }
+          - { name: "3.3", value: 3.3.7 }
+          - { name: "3.4", value: 3.4.1 }
+          - { name: jruby-9.4, value: jruby-9.4.10.0, rails-args: "--skip-webpack-install" }
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup ruby
-        uses: ruby/setup-ruby@e6689b4deb1cb2062ea45315001f687c0b52111b # v1.144.1
+        uses: ruby/setup-ruby@2654679fe7f7c29875c669398a8ec0791b8a64a1 # v1.215.0
         with:
           ruby-version: ${{ matrix.ruby.value }}
           bundler: none
       - name: Setup java
-        uses: actions/setup-java@3f07048e3d294f56e9b90ac5ea2c6f74e9ad0f98 # v3.10.0
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
         with:
           distribution: temurin
           java-version: 19.0.2
@@ -114,13 +128,62 @@ jobs:
         run: ruby setup.rb
         shell: bash
       - name: Check installation didn't modify any source controlled files
-        run: git diff --exit-code
+        run: git add . && git diff --cached --exit-code
         shell: bash
       - name: Check we can install a Gemfile with git sources
         run: bundle init && bundle add fileutils --git https://github.com/ruby/fileutils
         shell: bash
       - name: Generate a Rails application
-        run: gem install rails && rails new foo ${{ matrix.ruby.rails-args }}
+        run: gem install rails --version 8.0.1 && rails new foo ${{ matrix.ruby.rails-args }}
         shell: bash
+        if: matrix.ruby.name != 'jruby-9.4' && matrix.ruby.name != '3.1'
+      - name: Use gem installed in a bin dir different from where Ruby itself is installed
+        run: gem install rspec --version 3.13.0 --install-dir foo && GEM_HOME=foo foo/bin/rspec --version
+        shell: bash
+
+    timeout-minutes: 20
+
+  shared_gem_home:
+    name: Handling issues with a shared gem home
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        rubygems:
+          - dev
+          - system
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Setup original ruby
+        uses: ruby/setup-ruby@2654679fe7f7c29875c669398a8ec0791b8a64a1 # v1.215.0
+        with:
+          ruby-version: 3.2
+          bundler: none
+      - name: Save system RubyGems version to ENV
+        run: |
+          RGV=$(ruby -e 'puts Gem::VERSION.split(".")[0..2].join(".")')
+          echo "RGV=v$RGV" >> $GITHUB_ENV
+        if: matrix.rubygems == 'system'
+      - name: Set dev RubyGems version
+        run: |
+          RGV=..
+          echo "RGV=v$RGV" >> $GITHUB_ENV
+        if: matrix.rubygems == 'dev'
+      - name: Setup app depending on psych with initial Ruby
+        run: mkdir foo && cd foo && ruby ../bundler/spec/support/bundle.rb init && ruby ../bundler/spec/support/bundle.rb add psych -v 5.1.2
+        shell: bash
+        env:
+          GEM_HOME: bar
+          GEM_PATH: bar
+      - name: Setup final ruby
+        uses: ruby/setup-ruby@2654679fe7f7c29875c669398a8ec0791b8a64a1 # v1.215.0
+        with:
+          ruby-version: 3.3
+          bundler: none
+      - name: Install gems with final ruby, using GEM_HOME created by the other Ruby
+        run: ruby ../bundler/spec/support/bundle.rb install
+        working-directory: foo
+        env:
+          GEM_HOME: bar
+          GEM_PATH: bar
 
     timeout-minutes: 20

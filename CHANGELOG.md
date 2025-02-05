@@ -1,3 +1,892 @@
+# 3.6.3 / 2025-01-16
+
+## Enhancements:
+
+* Add credentials file path to `gem env`. Pull request
+  [#8375](https://github.com/rubygems/rubygems/pull/8375) by duckinator
+* Update SPDX license list as of 2024-12-30. Pull request
+  [#8387](https://github.com/rubygems/rubygems/pull/8387) by
+  github-actions[bot]
+* Installs bundler 2.6.3 as a default gem.
+
+## Bug fixes:
+
+* Fix `@licenses` array unmarshalling. Pull request
+  [#8411](https://github.com/rubygems/rubygems/pull/8411) by rykov
+
+# 3.6.2 / 2024-12-23
+
+## Security:
+
+* Fix Gem::SafeMarshal buffer overrun when given lengths larger than fit
+  into a byte. Pull request
+  [#8305](https://github.com/rubygems/rubygems/pull/8305) by segiddins
+* Improve type checking in marshal_load methods. Pull request
+  [#8306](https://github.com/rubygems/rubygems/pull/8306) by segiddins
+
+## Enhancements:
+
+* Skip rdoc hooks and their tests on newer rdoc versions. Pull request
+  [#8340](https://github.com/rubygems/rubygems/pull/8340) by
+  deivid-rodriguez
+* Installs bundler 2.6.2 as a default gem.
+
+## Bug fixes:
+
+* Fix serialized metadata including an empty `@original_platform`
+  attribute. Pull request
+  [#8355](https://github.com/rubygems/rubygems/pull/8355) by
+  deivid-rodriguez
+
+# 3.6.1 / 2024-12-17
+
+## Enhancements:
+
+* Installs bundler 2.6.1 as a default gem.
+
+## Bug fixes:
+
+* Fix `gem info` tagging some non default gems as default. Pull request
+  [#8321](https://github.com/rubygems/rubygems/pull/8321) by
+  deivid-rodriguez
+
+## Documentation:
+
+* Fix broken links. Pull request
+  [#8327](https://github.com/rubygems/rubygems/pull/8327) by st0012
+
+# 3.6.0 / 2024-12-16
+
+## Security:
+
+* Stop storing executable names in ivars. Pull request
+  [#8307](https://github.com/rubygems/rubygems/pull/8307) by segiddins
+
+## Breaking changes:
+
+* Drop ruby 3.0 support. Pull request
+  [#8091](https://github.com/rubygems/rubygems/pull/8091) by segiddins
+
+## Features:
+
+* Add --attestation option to gem push. Pull request
+  [#8239](https://github.com/rubygems/rubygems/pull/8239) by segiddins
+
+## Enhancements:
+
+* Skip unresolved deps warning on `Gem::Specification.reset` on benign
+  cases. Pull request
+  [#8309](https://github.com/rubygems/rubygems/pull/8309) by
+  deivid-rodriguez
+* Let `gem install <name>` suggest `<name>-ruby` and `ruby-<name>` when
+  providing "did you mean" suggestions. Pull request
+  [#8197](https://github.com/rubygems/rubygems/pull/8197) by duckinator
+* Update SPDX license list as of 2024-08-19. Pull request
+  [#8233](https://github.com/rubygems/rubygems/pull/8233) by
+  github-actions[bot]
+* Add `--target-rbconfig` option to `gem install` and `gem update`
+  commands. Pull request
+  [#7628](https://github.com/rubygems/rubygems/pull/7628) by kateinoigakukun
+* Skip nil-value keys to make metadata reproducible. Pull request
+  [#7129](https://github.com/rubygems/rubygems/pull/7129) by nobu
+* Allow disabling installation of compiled extensions into lib through
+  `Gem.configuration.install_extension_in_lib`. Pull request
+  [#6463](https://github.com/rubygems/rubygems/pull/6463) by hsbt
+* Installs bundler 2.6.0 as a default gem.
+
+## Bug fixes:
+
+* Set $0 to exe when running `gem exec` to fix name in CLI output. Pull
+  request [#8267](https://github.com/rubygems/rubygems/pull/8267) by adam12
+* Fix manifest in gem package using incorrect platform sometimes. Pull
+  request [#8202](https://github.com/rubygems/rubygems/pull/8202) by
+  deivid-rodriguez
+
+## Documentation:
+
+* Fix missing single quote in git source example. Pull request
+  [#8303](https://github.com/rubygems/rubygems/pull/8303) by nobu
+* Update the `gem install` demo in REAME to use a gem that just works on
+  Windows. Pull request
+  [#8262](https://github.com/rubygems/rubygems/pull/8262) by soda92
+* Unify rubygems and bundler docs directory. Pull request
+  [#8159](https://github.com/rubygems/rubygems/pull/8159) by hsbt
+
+# 3.5.23 / 2024-11-05
+
+## Enhancements:
+
+* Validate user input encoding of `gem` CLI arguments. Pull request
+  [#6471](https://github.com/rubygems/rubygems/pull/6471) by
+  deivid-rodriguez
+* Fix `gem update --system` leaving old default bundler executables
+  around. Pull request
+  [#8172](https://github.com/rubygems/rubygems/pull/8172) by
+  deivid-rodriguez
+* Installs bundler 2.5.23 as a default gem.
+
+## Bug fixes:
+
+* Fix commands with 2 MFA requests when webauthn is enabled. Pull request
+  [#8174](https://github.com/rubygems/rubygems/pull/8174) by
+  deivid-rodriguez
+* Make `--enable-load-relative` binstubs prolog work when Ruby is not
+  installed in the same directory as the binstub. Pull request
+  [#7872](https://github.com/rubygems/rubygems/pull/7872) by
+  deivid-rodriguez
+
+## Performance:
+
+* Speed up `gem install <nonexistent-gem>` by finding alternative name
+  suggestions faster. Pull request
+  [#8084](https://github.com/rubygems/rubygems/pull/8084) by duckinator
+
+## Documentation:
+
+* Add missing comma in documentation. Pull request
+  [#8152](https://github.com/rubygems/rubygems/pull/8152) by leoarnold
+
+# 3.5.22 / 2024-10-16
+
+## Enhancements:
+
+* Prevent `._*` files in packages generated from macOS. Pull request
+  [#8150](https://github.com/rubygems/rubygems/pull/8150) by
+  deivid-rodriguez
+* Fix `gem pristine etc` resetting gem twice sometimes. Pull request
+  [#8117](https://github.com/rubygems/rubygems/pull/8117) by
+  deivid-rodriguez
+* Allow `gem pristine` to reset default gems too. Pull request
+  [#8118](https://github.com/rubygems/rubygems/pull/8118) by
+  deivid-rodriguez
+* Update vendored `uri` and `net-http`. Pull request
+  [#8112](https://github.com/rubygems/rubygems/pull/8112) by segiddins
+* Installs bundler 2.5.22 as a default gem.
+
+## Bug fixes:
+
+* Fix `gem contents` for default gems. Pull request
+  [#8132](https://github.com/rubygems/rubygems/pull/8132) by
+  deivid-rodriguez
+* Fix duplicated specs when they have been previously activated. Pull
+  request [#8131](https://github.com/rubygems/rubygems/pull/8131) by
+  deivid-rodriguez
+* Fix `gem install` on NFS shares. Pull request
+  [#8123](https://github.com/rubygems/rubygems/pull/8123) by
+  deivid-rodriguez
+* Fix a `gem install` crash during "done installing" hooks. Pull request
+  [#8113](https://github.com/rubygems/rubygems/pull/8113) by
+  deivid-rodriguez
+* Fix plugin command loading. Pull request
+  [#8121](https://github.com/rubygems/rubygems/pull/8121) by
+  deivid-rodriguez
+
+# 3.5.21 / 2024-10-03
+
+## Enhancements:
+
+* Fix `Gem::MissingSpecVersionError#to_s` not showing exception message.
+  Pull request [#8074](https://github.com/rubygems/rubygems/pull/8074) by
+  deivid-rodriguez
+* Remove code that makes suggest_gems_from_name give worse results. Pull
+  request [#8083](https://github.com/rubygems/rubygems/pull/8083) by
+  duckinator
+* Warning about PATH in `--user-install` mode is only necessary for gems
+  with executables. Pull request
+  [#8071](https://github.com/rubygems/rubygems/pull/8071) by
+  deivid-rodriguez
+* Installs bundler 2.5.21 as a default gem.
+
+## Bug fixes:
+
+* Fix error in one source when fetching dependency APIs clearing results
+  from all sources. Pull request
+  [#8080](https://github.com/rubygems/rubygems/pull/8080) by
+  deivid-rodriguez
+* Fix `gem cleanup` warning when two versions of psych installed. Pull
+  request [#8072](https://github.com/rubygems/rubygems/pull/8072) by
+  deivid-rodriguez
+
+# 3.5.20 / 2024-09-24
+
+## Enhancements:
+
+* Installs bundler 2.5.20 as a default gem.
+
+# 3.5.19 / 2024-09-18
+
+## Enhancements:
+
+* Standardize pretty-print output for `Gem::Source` and subclasses. Pull
+  request [#7994](https://github.com/rubygems/rubygems/pull/7994) by
+  djberube
+* Update vendored `molinillo` to master and vendored `resolv` to 0.4.0.
+  Pull request [#7521](https://github.com/rubygems/rubygems/pull/7521) by
+  hsbt
+* Installs bundler 2.5.19 as a default gem.
+
+## Bug fixes:
+
+* Fix `bundle exec rake install` failing when local gem has extensions.
+  Pull request [#7977](https://github.com/rubygems/rubygems/pull/7977) by
+  deivid-rodriguez
+* Make `gem exec` use the standard GEM_HOME. Pull request
+  [#7982](https://github.com/rubygems/rubygems/pull/7982) by
+  deivid-rodriguez
+* Fix `gem fetch` always exiting with zero status code. Pull request
+  [#8007](https://github.com/rubygems/rubygems/pull/8007) by
+  deivid-rodriguez
+* Remove temporary `.lock` files unintentionally left around by gem
+  installer. Pull request
+  [#7939](https://github.com/rubygems/rubygems/pull/7939) by nobu
+* Removed unused stringio. Pull request
+  [#8001](https://github.com/rubygems/rubygems/pull/8001) by hsbt
+* Avoid another race condition of open mode. Pull request
+  [#7931](https://github.com/rubygems/rubygems/pull/7931) by nobu
+* Fix `@license` typo preventing licenses from being correctly
+  unmarshalled. Pull request
+  [#7975](https://github.com/rubygems/rubygems/pull/7975) by djberube
+
+## Performance:
+
+* Fix `gem install does-not-exist` being super slow. Pull request
+  [#8006](https://github.com/rubygems/rubygems/pull/8006) by
+  deivid-rodriguez
+
+# 3.5.18 / 2024-08-26
+
+## Enhancements:
+
+* Installs bundler 2.5.18 as a default gem.
+
+## Bug fixes:
+
+* Fix `gem uninstall <name>:<version>` failing on shadowed default gems.
+  Pull request [#7949](https://github.com/rubygems/rubygems/pull/7949) by
+  deivid-rodriguez
+
+# 3.5.17 / 2024-08-01
+
+## Enhancements:
+
+* Explicitly encode `Gem::Dependency` to yaml. Pull request
+  [#7867](https://github.com/rubygems/rubygems/pull/7867) by segiddins
+* Installs bundler 2.5.17 as a default gem.
+
+## Bug fixes:
+
+* Fix `gem list` regression when a regular gem shadows a default one. Pull
+  request [#7892](https://github.com/rubygems/rubygems/pull/7892) by
+  deivid-rodriguez
+* Always leave default gem executables around. Pull request
+  [#7879](https://github.com/rubygems/rubygems/pull/7879) by
+  deivid-rodriguez
+* Fix line comment issue for hash when loading gemrc. Pull request
+  [#7857](https://github.com/rubygems/rubygems/pull/7857) by leetking
+
+# 3.5.16 / 2024-07-18
+
+## Enhancements:
+
+* Installs bundler 2.5.16 as a default gem.
+
+## Bug fixes:
+
+* Fix gemspec `require_paths` validation. Pull request
+  [#7866](https://github.com/rubygems/rubygems/pull/7866) by
+  deivid-rodriguez
+* Fix loading of nested `gemrc` config keys when specified as symbols.
+  Pull request [#7851](https://github.com/rubygems/rubygems/pull/7851) by
+  moofkit
+
+## Performance:
+
+* Use `caller_locations` instead of splitting `caller`. Pull request
+  [#7708](https://github.com/rubygems/rubygems/pull/7708) by nobu
+
+# 3.5.15 / 2024-07-09
+
+## Enhancements:
+
+* Installs bundler 2.5.15 as a default gem.
+
+## Bug fixes:
+
+* Restrict generic `arm` to only match 32-bit arm. Pull request
+  [#7830](https://github.com/rubygems/rubygems/pull/7830) by ntkme
+* Protect creating binstubs with a file lock. Pull request
+  [#7806](https://github.com/rubygems/rubygems/pull/7806) by
+  deivid-rodriguez
+
+## Documentation:
+
+* Make it clearer that `add_dependency` is the main way to add
+  non-development dependencies. Pull request
+  [#7800](https://github.com/rubygems/rubygems/pull/7800) by jeromedalbert
+
+# 3.5.14 / 2024-06-21
+
+## Enhancements:
+
+* Installs bundler 2.5.14 as a default gem.
+
+## Bug fixes:
+
+* Make "bundler? update --bundler" behave identically. Pull request
+  [#7778](https://github.com/rubygems/rubygems/pull/7778) by x-yuri
+
+# 3.5.13 / 2024-06-14
+
+## Enhancements:
+
+* Installs bundler 2.5.13 as a default gem.
+
+## Bug fixes:
+
+* Never remove executables that may belong to a default gem. Pull request
+  [#7747](https://github.com/rubygems/rubygems/pull/7747) by
+  deivid-rodriguez
+
+# 3.5.12 / 2024-06-13
+
+## Enhancements:
+
+* Installs bundler 2.5.12 as a default gem.
+
+## Bug fixes:
+
+* Fix `gem uninstall` unresolved specifications warning. Pull request
+  [#7667](https://github.com/rubygems/rubygems/pull/7667) by
+  deivid-rodriguez
+* Fix `gem pristine` sometimes failing to pristine user installed gems.
+  Pull request [#7664](https://github.com/rubygems/rubygems/pull/7664) by
+  deivid-rodriguez
+
+# 3.5.11 / 2024-05-28
+
+## Enhancements:
+
+* Update SPDX license list as of 2024-05-22. Pull request
+  [#7689](https://github.com/rubygems/rubygems/pull/7689) by
+  github-actions[bot]
+* Fix the update_rubygems inconsistency (--disable-gems). Pull request
+  [#7658](https://github.com/rubygems/rubygems/pull/7658) by x-yuri
+* Accept WASI as an OS name in Gem::Platform. Pull request
+  [#7629](https://github.com/rubygems/rubygems/pull/7629) by kateinoigakukun
+* Warn if RubyGems version explicitly set in gemspec does not match
+  running version. Pull request
+  [#7460](https://github.com/rubygems/rubygems/pull/7460) by
+  deivid-rodriguez
+* Installs bundler 2.5.11 as a default gem.
+
+## Bug fixes:
+
+* Fix binstubs sometimes not getting regenerated when `--destdir` is
+  given. Pull request
+  [#7660](https://github.com/rubygems/rubygems/pull/7660) by
+  deivid-rodriguez
+* Fix `gem uninstall --user-install`  for symlinked HOME. Pull request
+  [#7645](https://github.com/rubygems/rubygems/pull/7645) by
+  deivid-rodriguez
+* Fix issue when plugin stubs would sometimes not be properly removed by
+  `gem uninstall`. Pull request
+  [#7631](https://github.com/rubygems/rubygems/pull/7631) by
+  deivid-rodriguez
+* Fix plugins uninstallation for user installed gems. Pull request
+  [#6456](https://github.com/rubygems/rubygems/pull/6456) by voxik
+
+## Performance:
+
+* Use a constant empty tar header to avoid extra allocations. Pull request
+  [#7484](https://github.com/rubygems/rubygems/pull/7484) by segiddins
+
+## Documentation:
+
+* Recommend `bin/rake` over `rake` in contributing docs. Pull request
+  [#7648](https://github.com/rubygems/rubygems/pull/7648) by
+  deivid-rodriguez
+
+# 3.5.10 / 2024-05-03
+
+## Security:
+
+* Add a limit to the size of the metadata and checksums files in a gem
+  package. Pull request
+  [#7568](https://github.com/rubygems/rubygems/pull/7568) by segiddins
+
+## Enhancements:
+
+* Don't fully require `rubygems` from `rubygems/package` to prevent some
+  circular require warnings when using Bundler. Pull request
+  [#7612](https://github.com/rubygems/rubygems/pull/7612) by
+  deivid-rodriguez
+* Installs bundler 2.5.10 as a default gem.
+
+## Bug fixes:
+
+* Rename credential email to identifier in WebAuthn poller. Pull request
+  [#7623](https://github.com/rubygems/rubygems/pull/7623) by jenshenny
+
+# 3.5.9 / 2024-04-12
+
+## Enhancements:
+
+* Installs bundler 2.5.9 as a default gem.
+
+# 3.5.8 / 2024-04-11
+
+## Security:
+
+* Respect global umask when writing regular files. Pull request
+  [#7518](https://github.com/rubygems/rubygems/pull/7518) by
+  deivid-rodriguez
+
+## Enhancements:
+
+* Allow string keys with gemrc. Pull request
+  [#7543](https://github.com/rubygems/rubygems/pull/7543) by hsbt
+* [Experimental] Add "gem rebuild" command. Pull request
+  [#4913](https://github.com/rubygems/rubygems/pull/4913) by duckinator
+* Installs bundler 2.5.8 as a default gem.
+
+## Bug fixes:
+
+* Fix NoMethodError crash when building errors about corrupt package
+  files. Pull request
+  [#7539](https://github.com/rubygems/rubygems/pull/7539) by jez
+* Fix resolver to properly intersect Arrays of `Gem::Resolver::Activation`
+  objects. Pull request
+  [#7537](https://github.com/rubygems/rubygems/pull/7537) by
+  deivid-rodriguez
+
+# 3.5.7 / 2024-03-22
+
+## Enhancements:
+
+* Warn on empty or open required_ruby_version specification attribute.
+  Pull request [#5010](https://github.com/rubygems/rubygems/pull/5010) by
+  simi
+* Control whether YAML aliases are enabled in Gem::SafeYAML.safe_load via
+  attribute. Pull request
+  [#7464](https://github.com/rubygems/rubygems/pull/7464) by segiddins
+* Update SPDX license list as of 2024-02-08. Pull request
+  [#7468](https://github.com/rubygems/rubygems/pull/7468) by
+  github-actions[bot]
+* Installs bundler 2.5.7 as a default gem.
+
+## Bug fixes:
+
+* Allow prerelease activation (even if requirement is not explicit about
+  it) when it's the only possibility. Pull request
+  [#7428](https://github.com/rubygems/rubygems/pull/7428) by kimesf
+
+## Documentation:
+
+* Fix a typo. Pull request
+  [#7505](https://github.com/rubygems/rubygems/pull/7505) by hsbt
+* Use https instead of http in documentation links. Pull request
+  [#7481](https://github.com/rubygems/rubygems/pull/7481) by hsbt
+
+# 3.5.6 / 2024-02-06
+
+## Enhancements:
+
+* Deep copy requirements in `Gem::Specification` and `Gem::Requirement`.
+  Pull request [#7439](https://github.com/rubygems/rubygems/pull/7439) by
+  flavorjones
+* Change gem login message to clear up that username can be also used.
+  Pull request [#7422](https://github.com/rubygems/rubygems/pull/7422) by
+  VitaliySerov
+* Add metadata for rubygems.org. Pull request
+  [#7435](https://github.com/rubygems/rubygems/pull/7435) by m-nakamura145
+* Improve gem login scope selection. Pull request
+  [#7342](https://github.com/rubygems/rubygems/pull/7342) by williantenfen
+* Vendor uri in RubyGems. Pull request
+  [#7386](https://github.com/rubygems/rubygems/pull/7386) by
+  deivid-rodriguez
+* Installs bundler 2.5.6 as a default gem.
+
+## Bug fixes:
+
+* Skip to load commented out words. Pull request
+  [#7413](https://github.com/rubygems/rubygems/pull/7413) by hsbt
+* Fix rake runtime dependency warning for rake based extension. Pull
+  request [#7395](https://github.com/rubygems/rubygems/pull/7395) by ntkme
+
+# 3.5.5 / 2024-01-18
+
+## Enhancements:
+
+* Installs bundler 2.5.5 as a default gem.
+
+## Bug fixes:
+
+* Fix `require` activation conflicts when requiring default gems under
+  some situations. Pull request
+  [#7379](https://github.com/rubygems/rubygems/pull/7379) by
+  deivid-rodriguez
+* Use cache_home instead of data_home in default_spec_cache_dir. Pull
+  request [#7331](https://github.com/rubygems/rubygems/pull/7331) by mrkn
+
+## Documentation:
+
+* Use squiggly heredocs in `Gem::Specification#description` documentation,
+  so it doesn't add leading whitespace. Pull request
+  [#7373](https://github.com/rubygems/rubygems/pull/7373) by bravehager
+
+# 3.5.4 / 2024-01-04
+
+## Enhancements:
+
+* Always avoid "Updating rubygems-update" message. Pull request
+  [#7335](https://github.com/rubygems/rubygems/pull/7335) by
+  deivid-rodriguez
+* Installs bundler 2.5.4 as a default gem.
+
+## Bug fixes:
+
+* Make `gem update --system` respect ruby version constraints. Pull
+  request [#7334](https://github.com/rubygems/rubygems/pull/7334) by
+  deivid-rodriguez
+
+# 3.5.3 / 2023-12-22
+
+## Enhancements:
+
+* Installs bundler 2.5.3 as a default gem.
+
+# 3.5.2 / 2023-12-21
+
+## Enhancements:
+
+* Support dynamic library loading with extension .so or .o. Pull request
+  [#7241](https://github.com/rubygems/rubygems/pull/7241) by hogelog
+* Installs bundler 2.5.2 as a default gem.
+
+## Performance:
+
+* Replace `object_id` comparison with identity Hash. Pull request
+  [#7303](https://github.com/rubygems/rubygems/pull/7303) by amomchilov
+* Use IO.copy_stream when reading, writing. Pull request
+  [#6958](https://github.com/rubygems/rubygems/pull/6958) by martinemde
+
+# 3.5.1 / 2023-12-15
+
+## Enhancements:
+
+* Installs bundler 2.5.1 as a default gem.
+
+# 3.5.0 / 2023-12-15
+
+## Security:
+
+* Replace `Marshal.load` with a fully-checked safe gemspec loader. Pull
+  request [#6896](https://github.com/rubygems/rubygems/pull/6896) by
+  segiddins
+
+## Breaking changes:
+
+* Drop ruby 2.6 and 2.7 support. Pull request
+  [#7116](https://github.com/rubygems/rubygems/pull/7116) by
+  deivid-rodriguez
+* Release package no longer includes test files. Pull request
+  [#6781](https://github.com/rubygems/rubygems/pull/6781) by hsbt
+* Hide `Gem::MockGemUi` from users. Pull request
+  [#6623](https://github.com/rubygems/rubygems/pull/6623) by hsbt
+* Deprecated `Gem.datadir` has been removed. Pull request
+  [#6469](https://github.com/rubygems/rubygems/pull/6469) by hsbt
+
+## Deprecations:
+
+* Deprecate `Gem::Platform.match?`. Pull request
+  [#6783](https://github.com/rubygems/rubygems/pull/6783) by hsbt
+* Deprecate `Gem::List`. Pull request
+  [#6311](https://github.com/rubygems/rubygems/pull/6311) by segiddins
+
+## Features:
+
+* The `generate_index` command can now generate compact index files and
+  lives as an external `rubygems-generate_index` gem. Pull request
+  [#7085](https://github.com/rubygems/rubygems/pull/7085) by segiddins
+* Make `gem install` fallback to user installation directory if default
+  gem home is not writable. Pull request
+  [#5327](https://github.com/rubygems/rubygems/pull/5327) by duckinator
+* Leverage ruby feature to warn when requiring default gems from stdlib
+  that will be turned into bundled gems in the future. Pull request
+  [#6840](https://github.com/rubygems/rubygems/pull/6840) by hsbt
+
+## Performance:
+
+* Use match? when regexp match data is unused. Pull request
+  [#7263](https://github.com/rubygems/rubygems/pull/7263) by segiddins
+* Fewer allocations in gem installation. Pull request
+  [#6975](https://github.com/rubygems/rubygems/pull/6975) by segiddins
+* Optimize allocations in `Gem::Version`. Pull request
+  [#6970](https://github.com/rubygems/rubygems/pull/6970) by segiddins
+
+## Enhancements:
+
+* Warn for duplicate meta data links when building gems. Pull request
+  [#7213](https://github.com/rubygems/rubygems/pull/7213) by etherbob
+* Vendor `net-http`, `net-protocol`, `resolv`, and `timeout` to reduce
+  conflicts between Gemfile gems and internal dependencies. Pull request
+  [#6793](https://github.com/rubygems/rubygems/pull/6793) by
+  deivid-rodriguez
+* Remove non-transparent requirement added to prerelease gems. Pull
+  request [#7226](https://github.com/rubygems/rubygems/pull/7226) by
+  deivid-rodriguez
+* Stream output from ext builds when --verbose. Pull request
+  [#7240](https://github.com/rubygems/rubygems/pull/7240) by osyoyu
+* Add missing services to CI detection and make it consistent between
+  RubyGems and Bundler. Pull request
+  [#7205](https://github.com/rubygems/rubygems/pull/7205) by nevinera
+* Update generate licenses template to not freeze regexps. Pull request
+  [#7154](https://github.com/rubygems/rubygems/pull/7154) by
+  github-actions[bot]
+* Don't check `LIBRUBY_RELATIVE` in truffleruby to signal a bash prelude
+  in rubygems binstubs. Pull request
+  [#7156](https://github.com/rubygems/rubygems/pull/7156) by
+  deivid-rodriguez
+* Update SPDX list and warn on deprecated identifiers. Pull request
+  [#6926](https://github.com/rubygems/rubygems/pull/6926) by simi
+* Simplify extended `require` to potentially fix some deadlocks. Pull
+  request [#6827](https://github.com/rubygems/rubygems/pull/6827) by nobu
+* Small refactors for `Gem::Resolver`. Pull request
+  [#6766](https://github.com/rubygems/rubygems/pull/6766) by hsbt
+* Use double-quotes instead of single-quotes consistently in warnings.
+  Pull request [#6550](https://github.com/rubygems/rubygems/pull/6550) by
+  hsbt
+* Add debug message for `nil` version gemspec. Pull request
+  [#6436](https://github.com/rubygems/rubygems/pull/6436) by hsbt
+* Installs bundler 2.5.0 as a default gem.
+
+## Bug fixes:
+
+* Fix installing from source with same default bundler version already
+  installed. Pull request
+  [#7244](https://github.com/rubygems/rubygems/pull/7244) by
+  deivid-rodriguez
+
+## Documentation:
+
+* Improve comment explaining the necessity of `write_default_spec` method.
+  Pull request [#6563](https://github.com/rubygems/rubygems/pull/6563) by
+  voxik
+
+# 3.4.22 / 2023-11-09
+
+## Enhancements:
+
+* Update SPDX license list as of 2023-10-05. Pull request
+  [#7040](https://github.com/rubygems/rubygems/pull/7040) by
+  github-actions[bot]
+* Remove unnecessary rescue. Pull request
+  [#7109](https://github.com/rubygems/rubygems/pull/7109) by
+  deivid-rodriguez
+* Installs bundler 2.4.22 as a default gem.
+
+## Bug fixes:
+
+* Handle empty array at built-in YAML serializer. Pull request
+  [#7099](https://github.com/rubygems/rubygems/pull/7099) by hsbt
+* Ignore non-tar format `.gem` files during search. Pull request
+  [#7095](https://github.com/rubygems/rubygems/pull/7095) by dearblue
+* Allow explicitly uninstalling multiple versions of same gem. Pull
+  request [#7063](https://github.com/rubygems/rubygems/pull/7063) by
+  kstevens715
+
+## Performance:
+
+* Avoid regexp match on every call to `Gem::Platform.local`. Pull request
+  [#7104](https://github.com/rubygems/rubygems/pull/7104) by segiddins
+
+## Documentation:
+
+* Get `Gem::Specification#extensions_dir` documented. Pull request
+  [#6218](https://github.com/rubygems/rubygems/pull/6218) by
+  deivid-rodriguez
+
+# 3.4.21 / 2023-10-17
+
+## Enhancements:
+
+* Abort `setup.rb` if Ruby is too old. Pull request
+  [#7011](https://github.com/rubygems/rubygems/pull/7011) by
+  deivid-rodriguez
+* Remove usage of Dir.chdir that only execute a subprocess. Pull request
+  [#6930](https://github.com/rubygems/rubygems/pull/6930) by segiddins
+* Freeze more strings in generated gemspecs. Pull request
+  [#6974](https://github.com/rubygems/rubygems/pull/6974) by segiddins
+* Use pure-ruby YAML parser for loading configuration at RubyGems. Pull
+  request [#6615](https://github.com/rubygems/rubygems/pull/6615) by hsbt
+* Installs bundler 2.4.21 as a default gem.
+
+## Documentation:
+
+* Update suggested variable for bindir. Pull request
+  [#7028](https://github.com/rubygems/rubygems/pull/7028) by hsbt
+* Fix invalid links in documentation. Pull request
+  [#7008](https://github.com/rubygems/rubygems/pull/7008) by simi
+
+# 3.4.20 / 2023-09-27
+
+## Enhancements:
+
+* Raise `Gem::Package::FormatError` when gem encounters corrupt EOF.
+  Pull request [#6882](https://github.com/rubygems/rubygems/pull/6882)
+  by martinemde
+* Allow skipping empty license `gem build` warning by setting license to
+  `nil`. Pull request
+  [#6879](https://github.com/rubygems/rubygems/pull/6879) by jhong97
+* Update SPDX license list as of 2023-06-18. Pull request
+  [#6891](https://github.com/rubygems/rubygems/pull/6891) by
+  github-actions[bot]
+* Update SPDX license list as of 2023-04-28. Pull request
+  [#6642](https://github.com/rubygems/rubygems/pull/6642) by segiddins
+* Update SPDX license list as of 2023-01-26. Pull request
+  [#6310](https://github.com/rubygems/rubygems/pull/6310) by segiddins
+* Installs bundler 2.4.20 as a default gem.
+
+## Bug fixes:
+
+* Fixed false positive SymlinkError in symbolic link directory. Pull
+  request [#6947](https://github.com/rubygems/rubygems/pull/6947) by
+  negi0109
+* Ensure that loading multiple gemspecs with legacy YAML class references
+  does not warn. Pull request
+  [#6889](https://github.com/rubygems/rubygems/pull/6889) by segiddins
+* Fix NoMethodError when choosing a too big number from `gem uni` list.
+  Pull request [#6901](https://github.com/rubygems/rubygems/pull/6901) by
+  amatsuda
+
+## Performance:
+
+* Reduce allocations for stub specifications. Pull request
+  [#6972](https://github.com/rubygems/rubygems/pull/6972) by segiddins
+
+# 3.4.19 / 2023-08-17
+
+## Enhancements:
+
+* Installs bundler 2.4.19 as a default gem.
+
+## Performance:
+
+* Speedup building docs when updating rubygems. Pull request
+  [#6864](https://github.com/rubygems/rubygems/pull/6864) by
+  deivid-rodriguez
+
+# 3.4.18 / 2023-08-02
+
+## Enhancements:
+
+* Add poller to fetch WebAuthn OTP. Pull request
+  [#6774](https://github.com/rubygems/rubygems/pull/6774) by jenshenny
+* Remove side effects when unmarshaling old `Gem::Specification`. Pull
+  request [#6825](https://github.com/rubygems/rubygems/pull/6825) by nobu
+* Ship rubygems executables in `exe` folder. Pull request
+  [#6704](https://github.com/rubygems/rubygems/pull/6704) by hsbt
+* Installs bundler 2.4.18 as a default gem.
+
+# 3.4.17 / 2023-07-14
+
+## Enhancements:
+
+* Installs bundler 2.4.17 as a default gem.
+
+## Performance:
+
+* Avoid unnecessary work for private local gem installation. Pull request
+  [#6810](https://github.com/rubygems/rubygems/pull/6810) by
+  deivid-rodriguez
+
+# 3.4.16 / 2023-07-10
+
+## Enhancements:
+
+* Installs bundler 2.4.16 as a default gem.
+
+# 3.4.15 / 2023-06-29
+
+## Enhancements:
+
+* Installs bundler 2.4.15 as a default gem.
+
+## Bug fixes:
+
+* Autoload shellwords when it's needed. Pull request
+  [#6734](https://github.com/rubygems/rubygems/pull/6734) by ioquatix
+
+## Documentation:
+
+* Update command to test local gem command changes. Pull request
+  [#6761](https://github.com/rubygems/rubygems/pull/6761) by jenshenny
+
+# 3.4.14 / 2023-06-12
+
+## Enhancements:
+
+* Load plugin immediately. Pull request
+  [#6673](https://github.com/rubygems/rubygems/pull/6673) by kou
+* Installs bundler 2.4.14 as a default gem.
+
+## Documentation:
+
+* Clarify what the `rubygems-update` gem is for, and link to source code
+  and guides. Pull request
+  [#6710](https://github.com/rubygems/rubygems/pull/6710) by davetron5000
+
+# 3.4.13 / 2023-05-09
+
+## Enhancements:
+
+* Installs bundler 2.4.13 as a default gem.
+
+# 3.4.12 / 2023-04-11
+
+## Enhancements:
+
+* [Experimental] Add WebAuthn Support to the CLI. Pull request
+  [#6560](https://github.com/rubygems/rubygems/pull/6560) by jenshenny
+* Installs bundler 2.4.12 as a default gem.
+
+# 3.4.11 / 2023-04-10
+
+## Enhancements:
+
+* Installs bundler 2.4.11 as a default gem.
+
+# 3.4.10 / 2023-03-27
+
+## Enhancements:
+
+* Installs bundler 2.4.10 as a default gem.
+
+# 3.4.9 / 2023-03-20
+
+## Enhancements:
+
+* Improve `TarHeader#calculate_checksum` speed and readability. Pull
+  request [#6476](https://github.com/rubygems/rubygems/pull/6476) by
+  Maumagnaguagno
+* Added only missing extensions option into pristine command. Pull request
+  [#6446](https://github.com/rubygems/rubygems/pull/6446) by hsbt
+* Installs bundler 2.4.9 as a default gem.
+
+## Bug fixes:
+
+* Fix `$LOAD_PATH` in rake and ext_conf builder. Pull request
+  [#6490](https://github.com/rubygems/rubygems/pull/6490) by ntkme
+* Fix `gem uninstall` with `--install-dir`. Pull request
+  [#6481](https://github.com/rubygems/rubygems/pull/6481) by
+  deivid-rodriguez
+
+## Documentation:
+
+* Document our current release policy. Pull request
+  [#6450](https://github.com/rubygems/rubygems/pull/6450) by
+  deivid-rodriguez
+
 # 3.4.8 / 2023-03-08
 
 ## Enhancements:
@@ -635,7 +1524,7 @@
 
 ## Enhancements:
 
-* Redact credentails when printing URI. Pull request [#4868](https://github.com/rubygems/rubygems/pull/4868) by intuxicated
+* Redact credentials when printing URI. Pull request [#4868](https://github.com/rubygems/rubygems/pull/4868) by intuxicated
 * Prefer `require_relative` to `require` for internal requires. Pull
   request [#4858](https://github.com/rubygems/rubygems/pull/4858) by deivid-rodriguez
 * Prioritise gems with higher version for fetching metadata, and stop
@@ -5468,7 +6357,7 @@ There has been some minor usability enhancements and changes ...
   This *greatly* speeds up gem commands run in non-admin mode when the
   site-wide cache is out of date.
 * The gem command now used an HTTP HEAD command to detect if the
-  server's source index needs to be downloaed.
+  server's source index needs to be downloaded.
 * gem check gemname --test will run unit tests on installed gems that
   have unit tests.
 * Multiple gem names are allowed on the gem install command line.

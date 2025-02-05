@@ -3,27 +3,29 @@ connection: keep-alive
 content-length: 2864
 content-type: text/plain; charset=utf-8
 x-frame-options: SAMEORIGIN
-x-xss-protection: 1; mode=block
+x-xss-protection: 0
 x-content-type-options: nosniff
 x-download-options: noopen
 x-permitted-cross-domain-policies: none
 referrer-policy: strict-origin-when-cross-origin
 etag: "0be7877ed9e9b4635a1e1312794fe96e"
-last-modified: Mon, 14 Dec 2020 17:18:01 GMT
+last-modified: Sat, 30 Sep 2023 08:42:24 GMT
+digest: sha-256=XtEbTY//AB2eKhURjrSEklMNFQ4isOU7454znCbBf+w=
 cache-control: max-age=60, public
-content-security-policy: default-src 'self'; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://secure.gaug.es https://gravatar.com https://secure.gravatar.com https://*.fastly-insights.com; object-src 'none'; script-src 'self' https://secure.gaug.es https://www.fastly-insights.com; style-src 'self' https://fonts.googleapis.com; connect-src 'self' https://s3-us-west-2.amazonaws.com/rubygems-dumps/ https://*.fastly-insights.com https://fastly-insights.com https://api.github.com; form-action 'self'; frame-ancestors 'self'
-x-request-id: 82aae47d-53e7-449d-8eaf-c6fa7eb96587
-x-runtime: 0.011575
+content-security-policy: default-src 'self'; font-src 'self' https://fonts.gstatic.com; img-src 'self' https://secure.gaug.es https://gravatar.com https://www.gravatar.com https://secure.gravatar.com https://*.fastly-insights.com https://avatars.githubusercontent.com; object-src 'none'; script-src 'self' https://secure.gaug.es https://www.fastly-insights.com https://unpkg.com/@hotwired/stimulus/dist/stimulus.umd.js https://unpkg.com/stimulus-rails-nested-form/dist/stimulus-rails-nested-form.umd.js 'nonce-'; style-src 'self' https://fonts.googleapis.com; connect-src 'self' https://s3-us-west-2.amazonaws.com/rubygems-dumps/ https://*.fastly-insights.com https://fastly-insights.com https://api.github.com http://localhost:*; form-action 'self' https://github.com/login/oauth/authorize; frame-ancestors 'self'; report-uri https://csp-report.browser-intake-datadoghq.com/api/v2/logs?dd-api-key=pub852fa3e2312391fafa5640b60784e660&dd-evp-origin=content-security-policy&ddsource=csp-report&ddtags=service%3Arubygems.org%2Cversion%3A395f67d72bcfa61d0b7d0ff3bc4254958463870e%2Cenv%3Aproduction%2Ctrace_id%3A2223732284853918507
+x-request-id: 2e4b2a4f-d934-4707-b027-47367bf75104
+x-runtime: 0.020014
 strict-transport-security: max-age=31536000
-x-backend: F_Rails 52.25.15.240:443
+fastly-restarts: 1
+via: 1.1 varnish, 1.1 varnish
+x-backend: F_Rails 52.24.74.243:443, fastlyshield--shield_ssl_cache_bfi_krnt7300063_BFI 167.82.143.63:443
 accept-ranges: bytes
-date: Tue, 27 Dec 2022 11:24:54 GMT
-via: 1.1 varnish
-age: 3136
-x-served-by: cache-mad22059-MAD
-x-cache: HIT
-x-cache-hits: 1
-x-timer: S1672140294.027796,VS0,VE1
+date: Fri, 15 Dec 2023 19:03:09 GMT
+age: 901
+x-served-by: cache-bfi-krnt7300063-BFI, cache-mad22075-MAD
+x-cache: HIT, HIT
+x-cache-hits: 1739, 1
+x-timer: S1702666989.871375,VS0,VE167
 vary: Accept,Accept-Encoding
 server: RubyGems.org
 

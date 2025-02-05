@@ -11,7 +11,7 @@ class Gem::Commands::DependencyCommand < Gem::Command
   def initialize
     super "dependency",
           "Show the dependencies of an installed gem",
-          :version => Gem::Requirement.default, :domain => :local
+          version: Gem::Requirement.default, domain: :local
 
     add_version_option
     add_platform_option
@@ -90,10 +90,9 @@ use with other commands.
 
   def display_pipe(specs) # :nodoc:
     specs.each do |spec|
-      unless spec.dependencies.empty?
-        spec.dependencies.sort_by(&:name).each do |dep|
-          say "#{dep.name} --version '#{dep.requirement}'"
-        end
+      next if spec.dependencies.empty?
+      spec.dependencies.sort_by(&:name).each do |dep|
+        say "#{dep.name} --version '#{dep.requirement}'"
       end
     end
   end

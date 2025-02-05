@@ -22,6 +22,7 @@ module Bundler
       @metadata_source        = Source::Metadata.new
 
       @merged_gem_lockfile_sections = false
+      @local_mode = true
     end
 
     def merged_gem_lockfile_sections?
@@ -73,6 +74,10 @@ module Bundler
       global_rubygems_source
     end
 
+    def local_mode?
+      @local_mode
+    end
+
     def default_source
       global_path_source || global_rubygems_source
     end
@@ -86,7 +91,7 @@ module Bundler
     end
 
     def rubygems_remotes
-      rubygems_sources.map(&:remotes).flatten.uniq
+      rubygems_sources.flat_map(&:remotes).uniq
     end
 
     def all_sources
@@ -99,10 +104,6 @@ module Bundler
 
     def get(source)
       source_list_for(source).find {|s| equivalent_source?(source, s) }
-    end
-
-    def get_with_fallback(source)
-      get(source) || default_source
     end
 
     def lock_sources
@@ -140,8 +141,16 @@ module Bundler
       different_sources?(lock_sources, replacement_sources)
     end
 
+    def prefer_local!
+      all_sources.each(&:prefer_local!)
+    end
+
     def local_only!
       all_sources.each(&:local_only!)
+    end
+
+    def local!
+      all_sources.each(&:local!)
     end
 
     def cached!
@@ -149,6 +158,8 @@ module Bundler
     end
 
     def remote!
+      @local_mode = false
+
       all_sources.each(&:remote!)
     end
 
@@ -161,7 +172,11 @@ module Bundler
     end
 
     def map_sources(replacement_sources)
-      rubygems, git, plugin = [@rubygems_sources, @git_sources, @plugin_sources].map do |sources|
+      rubygems = @rubygems_sources.map do |source|
+        replace_rubygems_source(replacement_sources, source) || source
+      end
+
+      git, plugin = [@git_sources, @plugin_sources].map do |sources|
         sources.map do |source|
           replacement_sources.find {|s| s == source } || source
         end
@@ -175,10 +190,19 @@ module Bundler
     end
 
     def global_replacement_source(replacement_sources)
-      replacement_source = replacement_sources.find {|s| s == global_rubygems_source }
+      replacement_source = replace_rubygems_source(replacement_sources, global_rubygems_source)
       return global_rubygems_source unless replacement_source
 
       replacement_source.local!
+      replacement_source
+    end
+
+    def replace_rubygems_source(replacement_sources, gemfile_source)
+      replacement_source = replacement_sources.find {|s| s == gemfile_source }
+      return unless replacement_source
+
+      # locked sources never include credentials so always prefer remotes from the gemfile
+      replacement_source.remotes = gemfile_source.remotes
       replacement_source
     end
 

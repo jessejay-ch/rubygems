@@ -2,38 +2,45 @@ name: ubuntu-lint
 
 on:
   pull_request:
-  merge_group:
+
+  push:
+    branches:
+      - master
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
-permissions:  # added using https://github.com/step-security/secure-workflows
+permissions: # added using https://github.com/step-security/secure-workflows
   contents: read
 
 jobs:
   ubuntu_lint:
-    name: Lint
-    runs-on: ubuntu-22.04
+    name: Lint on ${{ matrix.ruby.name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - { name: ruby, value: 3.4.1 }
+          - { name: truffleruby, value: truffleruby-24.1.2 }
     env:
       RUBYOPT: -Ilib
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup ruby
-        uses: ruby/setup-ruby@e6689b4deb1cb2062ea45315001f687c0b52111b # v1.144.1
+        uses: ruby/setup-ruby@2654679fe7f7c29875c669398a8ec0791b8a64a1 # v1.215.0
         with:
-          ruby-version: 3.2.1
+          ruby-version: ${{ matrix.ruby.value }}
           bundler: none
       - name: Install Dependencies
-        run: rake setup
+        run: bin/rake setup
       - name: Run Lint
-        run: rake rubocop
+        run: bin/rake rubocop
       - name: Generate docs
-        run: rake docs
+        run: bin/rake docs
       - name: Install & Check Dependencies
         run: bin/rake dev:frozen_deps
-        working-directory: ./bundler
       - name: Misc checks
-        run: bin/rake check_rvm_integration man:check check_rubygems_integration
-        working-directory: ./bundler
+        run: bin/rake check_rvm_integration man:check vendor:check version:check check_rubygems_integration
     timeout-minutes: 15

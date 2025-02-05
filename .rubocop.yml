@@ -2,16 +2,68 @@ require: rubocop-performance
 
 AllCops:
   DisabledByDefault: true
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 3.1
   Exclude:
-    - 'bundler/**/*'
-    - 'lib/rubygems/resolver/molinillo/**/*'
-    - 'lib/rubygems/tsort/**/*'
-    - 'lib/rubygems/optparse/**/*'
-    - 'pkg/**/*'
-    - 'tmp/**/*'
+    - pkg/**/*
+    - tmp/**/*
+    - bundler/tmp/**/*
+    - lib/rubygems/vendor/**/*
+    - bundler/lib/bundler/vendor/**/*
   CacheRootDirectory: tmp/rubocop
   MaxFilesInCache: 5000
+
+# We disabled some cops because they are not compatible with rubygems and bundler.
+# So, We exclude rubygems files.
+
+# Naming
+
+Naming/ConstantName:
+  Enabled: true
+  Exclude:
+    - lib/**/*
+    - test/**/*
+
+Naming/MethodName:
+  Enabled: true
+  Exclude:
+    - lib/**/*
+    - test/**/*
+
+Naming/VariableName:
+  Enabled: true
+
+Naming/VariableNumber:
+  Enabled: true
+  Exclude:
+    - lib/**/*
+    - test/**/*
+    - tool/**/*
+
+# Style
+
+Style/ClassVars:
+  Enabled: true
+  Exclude:
+    - lib/**/*
+    - test/**/*
+
+Style/FormatString:
+  Enabled: true
+
+Style/HashSyntax:
+  Enabled: true
+  EnforcedShorthandSyntax: either
+
+Style/LineEndConcatenation:
+  Enabled: true
+
+Style/NumericLiteralPrefix:
+  Enabled: true
+
+Style/RegexpLiteral:
+  Enabled: true
+
+# Following cops are enabled rubygems and bundler
 
 Bundler/DuplicatedGem:
   Enabled: true
@@ -31,6 +83,36 @@ Gemspec/RequiredRubyVersion:
     - bundler/spec/realworld/fixtures/warbler/demo/demo.gemspec
     - test/rubygems/specifications/*.gemspec
     - test/rubygems/test_gem_ext_cargo_builder/**/*.gemspec
+
+Lint/BinaryOperatorWithIdenticalOperands:
+  Enabled: true
+
+Lint/RequireParentheses:
+  Enabled: true
+
+Lint/ShadowingOuterLocalVariable:
+  Enabled: true
+
+Lint/UnreachableCode:
+  Enabled: true
+
+Lint/UnderscorePrefixedVariableName:
+  Enabled: true
+
+Lint/ReturnInVoidContext:
+  Enabled: true
+
+Lint/RescueException:
+  Enabled: true
+
+Lint/NonLocalExitFromIterator:
+  Enabled: true
+
+Lint/EmptyExpression:
+  Enabled: true
+
+Lint/DuplicateCaseCondition:
+  Enabled: true
 
 Lint/UselessAccessModifier:
   Enabled: true
@@ -149,8 +231,7 @@ Lint/SafeNavigationConsistency:
 Lint/ScriptPermission:
   Enabled: true
   Exclude:
-    - 'bundler/lib/bundler/templates/Executable'
-    - 'bundler/lib/bundler/templates/Executable.*'
+    - "bundler/lib/bundler/templates/Executable"
 
 Lint/ShadowedArgument:
   Enabled: true
@@ -314,8 +395,8 @@ Layout/SpaceInsideBlockBraces:
   Enabled: true
   SpaceBeforeBlockParameters: false
   Exclude:
-  - bundler/lib/bundler/templates/Gemfile
-  - bundler/lib/bundler/templates/gems.rb
+    - bundler/lib/bundler/templates/Gemfile
+    - bundler/lib/bundler/templates/gems.rb
 
 Layout/SpaceInsideHashLiteralBraces:
   Enabled: true
@@ -327,6 +408,9 @@ Layout/TrailingEmptyLines:
   Enabled: true
 
 Layout/TrailingWhitespace:
+  Enabled: true
+
+Lint/Void:
   Enabled: true
 
 Lint/DuplicateMethods:
@@ -384,6 +468,9 @@ Naming/HeredocDelimiterNaming:
   ForbiddenDelimiters:
     - ^RB$
 
+Naming/BlockParameterName:
+  Enabled: true
+
 Naming/AsciiIdentifiers:
   Enabled: true
 
@@ -396,7 +483,18 @@ Naming/ClassAndModuleCamelCase:
 Naming/FileName:
   Enabled: true
   Exclude:
-    - 'bundler/spec/realworld/fixtures/warbler/bin/warbler-example.rb'
+    - "bundler/spec/realworld/fixtures/warbler/bin/warbler-example.rb"
+
+Naming/MemoizedInstanceVariableName:
+  Enabled: true
+
+# Performance
+
+Performance/RegexpMatch:
+  Enabled: true
+
+Performance/MapCompact:
+  Enabled: true
 
 Performance/TimesMap:
   Enabled: true
@@ -409,6 +507,10 @@ Performance/Count:
 
 Performance/Casecmp:
   Enabled: true
+
+Performance/FlatMap:
+  Enabled: true
+  EnabledForFlattenWithoutParams: true
 
 Performance/StartWith:
   Enabled: true
@@ -440,10 +542,28 @@ Performance/Size:
 Performance/UriDefaultParser:
   Enabled: true
 
+Style/MultilineMemoization:
+  Enabled: true
+
 Security/Open:
   Enabled: true
 
 Security/JSONLoad:
+  Enabled: true
+
+Style/RedundantReturn:
+  Enabled: true
+
+Style/AsciiComments:
+  Enabled: true
+
+Style/Next:
+  Enabled: true
+
+Style/MultilineTernaryOperator:
+  Enabled: true
+
+Style/NestedModifier:
   Enabled: true
 
 Style/FrozenStringLiteralComment:
